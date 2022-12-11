@@ -2,7 +2,7 @@ package Human;
 
 public interface Cognitiveable {
 
-    String mksr();
+    String makeSure();
 
     String payAttention();
 

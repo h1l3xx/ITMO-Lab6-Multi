@@ -1,7 +1,8 @@
 package Items;
 
 public enum How {
-    HARD(" сильно"), MAX(" как можно "), MET(" давольно метко ");
+    HARD(" сильно"), MAX(" как можно "), MET(" давольно метко "), FULL(" доверху наполненной "), BUT("зато"), HOWPOWER("с такой силой, что "),
+    HOWEVER(", однако, ");
 
     private final String how;
 

@@ -11,4 +11,8 @@ public abstract class Item {
         this.name = name;
         this.size = size;
     }
+
+    protected Item() {
+    }
+
 }

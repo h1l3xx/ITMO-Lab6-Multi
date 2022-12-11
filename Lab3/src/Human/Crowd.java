@@ -5,6 +5,10 @@ public class Crowd extends Human {
 
     public Crowd() {}
 
+    public Crowd(String name){
+        this.name = name;
+    }
+
     public String laughing(){
         return "смеющихся ";
     }
@@ -13,6 +17,17 @@ public class Crowd extends Human {
         return "засмеялись ";
     }
 
+    public String wanted(){
+        return "хотел ";
+    }
+
+    public String throwBall(){
+        return "швырнуть ";
+    }
+
+    public String pay(){
+        return ", платили сантик. ";
+    }
 
 
     @Override
