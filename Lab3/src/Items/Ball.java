@@ -31,25 +31,24 @@ public class Ball extends Item {
     }
 
     public interface FormBalls{
-        String returnBalls1();
-        String returnBalls2();
-        String returnBalls3();
+        String ballPluralCreativeCase();
+        String ballSingularCreativeCase();
+        String ballPluralGenitiveCase();
     }
 
     public FormBalls getFormBalls() {
         class MoreBalls implements FormBalls {
             @Override
-            public String returnBalls1() {
+            public String ballPluralCreativeCase() {
                 return "мячами. ";
             }
-
             @Override
-            public String returnBalls2() {
+            public String ballSingularCreativeCase() {
                 return "мячом ";
             }
 
             @Override
-            public String returnBalls3() {
+            public String ballPluralGenitiveCase() {
                 return "мячей ";
             }
         }

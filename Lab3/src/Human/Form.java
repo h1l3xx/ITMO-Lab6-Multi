@@ -1,8 +1,8 @@
 package Human;
 
 public enum Form {
-    HE("Он "), HEL("он "), HIM("его") ,  ALL(" Все "), SHORTYS("коротышек, "), CR("толпу"), WHO(" кто"), SHORTY("коротышку "), YOURSELF_AND_OTHERS("себя и других "),
-    THEM("их "), FROM("От "), UNLUCKYMAN(" у бедняги ");
+    HE("Он "), HIM("его") ,  ALL(" Все "), SHORTYS("коротышек, "), CR("толпу"), WHO(" кто"), SHORTY("коротышку "), YOURSELF_AND_OTHERS("себя и других "),
+    THEM("их "), FROM("От "), UNLUCKY_MAN(" у бедняги ");
 
     private final String form;
 

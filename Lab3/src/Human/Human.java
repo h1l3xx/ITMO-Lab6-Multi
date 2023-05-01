@@ -1,29 +1,33 @@
 package Human;
 
-
-import java.lang.constant.Constable;
-
 public class Human implements Moveable, Emotionable, Cognitiveable{
     String name;
     Size size;
     Sex sex;
 
-    String old_face;
+    String eyelid_name;
 
-    String eyelid;
+    String health = "poor";
+
+    String charactersFace;
+
 
     String condition;
 
 
-    public Human(String name, Sex sex, Size size) {
+    public Human(String name, Sex sex, Size size) throws NoNameException {
+        if (name.length() == 0)
+            throw new NoNameException();
         this.name = name;
-        this.sex = sex;
         this.size = size;
+        this.sex = sex;
+
+
     }
 
     public class Face {
-        public void string(){
-            old_face = "лицо";
+        public void setFace(){
+            charactersFace = "лицо";
         }
 
         public static class Eye {
@@ -33,48 +37,46 @@ public class Human implements Moveable, Emotionable, Cognitiveable{
             }
 
             String eye;
-            String eyeL;
             public void stringEye(){
                 eye = "глаз";
-                eyeL = "Глаз";
             }
         }
 
     }
 
-    Face eyelid1 = new Face(){
-        public void string(){
-            eyelid = "веко";
-            condition = "разпухло. ";
+    Face eyelids = new Face(){
+        public void swallUp(){
+            eyelid_name = "веко";
+            condition = "распухло. ";
         }
 
     };
 
     public String stringEyelid() {
-        eyelid1.string();
-        return eyelid;
+        eyelids.setFace();
+        return eyelid_name;
     }
-    public String eyelidswollen(){
-        eyelid1.string();
+    public String eyelidSwollen(){
+        eyelids.setFace();
         return condition;
+    }
+
+    public String eyeDontSee(){
+        return "закрылся и перестал видеть";
     }
 
     public String eye(){
         Face.Eye eye1 = new Face.Eye();
         eye1.stringEye();
         return eye1.eye;
+
     }
 
-    public String eyeL(){
-        Face.Eye eye1 = new Face.Eye();
-        eye1.stringEye();
-        return eye1.eyeL;
-    }
 
-    public String face(){
+    public String charactersFace(){
         Face face = new Face();
-        face.string();
-        return old_face;
+        face.setFace();
+        return charactersFace;
     }
 
     public Human() {}
@@ -125,7 +127,15 @@ public class Human implements Moveable, Emotionable, Cognitiveable{
 
     @Override
     public String jumpUp() {
-        return " вскочив на помост";
+        class Platform {
+            final String platform = "помост";
+            @Override
+            public String toString(){
+                return platform;
+            }
+        }
+
+        return " вскочив на " + new Platform();
     }
 
     @Override
@@ -181,7 +191,7 @@ public class Human implements Moveable, Emotionable, Cognitiveable{
         return "принялся швырять ";
     }
 
-    public String Shortyman(){
+    public String shortyMan(){
         return " коротышки.";
     }
 
@@ -190,8 +200,8 @@ public class Human implements Moveable, Emotionable, Cognitiveable{
         return "хозяина балаганчика.";
     }
 
-    public String scaryman(){
-        return ". Испуганный коротышка";
+    public String getScary(){
+        return "Испуганный коротышка";
     }
 
     public String heCant(){
@@ -211,6 +221,16 @@ public class Human implements Moveable, Emotionable, Cognitiveable{
     }
     public String yelled(){
         return "закричал: ";
+    }
+
+    public void checkHealth(){
+        if (health.equals("normal")){
+            throw new PoorHealthException();
+        }
+    }
+
+    public String standUp(){
+        return " снова поднялся";
     }
 
 

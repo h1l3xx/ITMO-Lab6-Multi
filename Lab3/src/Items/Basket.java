@@ -9,5 +9,6 @@ public class Basket extends Item{
     }
     public String toString(){
         return "большой белой корзины,";
+
     }
 }

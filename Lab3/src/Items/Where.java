@@ -1,7 +1,7 @@
 package Items;
 
 public enum Where {
-    CURTAIN(" за занавеской"), HOLE("в отверстие голову"), HERE("здесь надо"), AROUND("вокруг"), NEAR("возле ");
+    CURTAIN(" за занавеской"), HOLE("в отверстие голову"), HERE("здесь надо"), AROUND("вокруг"), NEAR("возле "), UP("кверху");
 
     private final String where;
 

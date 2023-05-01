@@ -1,5 +1,7 @@
 package Items;
 
+import java.lang.constant.Constable;
+
 public class Game {
     String name;
     String start = " началась ";
@@ -7,7 +9,7 @@ public class Game {
     public Game(String name) {
         this.name = name;
     }
-    public String Ga(){
+    public String startGame(){
         return start;
     }
 
