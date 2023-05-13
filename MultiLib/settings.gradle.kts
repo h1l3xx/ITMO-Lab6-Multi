@@ -9,3 +9,4 @@
 
 rootProject.name = "MultiLib"
 include("server", "client", "lib")
+include("entrypoint")

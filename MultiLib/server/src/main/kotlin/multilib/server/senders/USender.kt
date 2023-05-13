@@ -30,11 +30,6 @@ class USender : Sender {
             sendStack += string +"\n"
         }
     }
-    fun sendValues(key : String, value : String){
-        print {
-            "$key --- $value"
-        }
-    }
     fun newManager(manager: ChannelAndAddressManager){
         this.manager = manager
     }
