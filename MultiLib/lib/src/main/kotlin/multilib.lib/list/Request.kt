@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 import java.net.SocketAddress
 
 @Serializable
-data class Request(val sender : String, val from : String, val who : Int, val message : MessageDto) {
+data class Request(val sender : String, var from : String, val who : Int, val message : MessageDto) {
     constructor(sender: SocketAddress, from: SocketAddress, who: Int, message: MessageDto): this(sender.toString(), from.toString(), who, message)
 
     fun getSender(): SocketAddress {

@@ -27,5 +27,5 @@ class Human {
         this.birthday = birthday
     }
 
-    override fun toString(): String ="возраст: $age, день рождения: $birthday"
+    override fun toString(): String ="Возраст: $age, День рождения: $birthday"
 }

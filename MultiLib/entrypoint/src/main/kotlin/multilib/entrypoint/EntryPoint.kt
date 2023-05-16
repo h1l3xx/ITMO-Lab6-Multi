@@ -7,6 +7,7 @@ import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
+import kotlin.system.exitProcess
 
 class EntryPoint : Channel(DatagramChannel.open()) {
     var serversList = mutableListOf<ConnectionList>()
@@ -85,8 +86,9 @@ class EntryPoint : Channel(DatagramChannel.open()) {
     private fun serverManager(request: Request, address : SocketAddress){
         checkServer(address) //Добавили сервер в список (если его там не было).
         val message = request.message.message
+        println(message)
         if (message.contains("try to connect")){
-            sendRequestToServer(Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), "success")))
+            sendRequestToServer(Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), "success")), address)
         }else{
             resendAnswerToClient(request)
         }
@@ -94,14 +96,14 @@ class EntryPoint : Channel(DatagramChannel.open()) {
     private fun clientManager(request: Request, address: SocketAddress){
         checkClient(address) //Добавили клиента в список (если его там не было)
         if (serversList.isNotEmpty()){
-            sendRequestToServer(request)
+            sendRequestToServer(request, address)
         }else{
             sendErrorRequestToClient("Нет ни одного рабочего сервера, отправьте свой запрос позже.", address)
         }
     }
-    private fun sendRequestToServer(request: Request){
+    private fun sendRequestToServer(request: Request, clientAddress : SocketAddress){
         val serverAddress = serversList[0].getAddr()
-        serverToClient[serverAddress] = request.getFrom()
+        request.from = clientAddress.toString()
         send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), serverAddress)
     }
     private fun sendErrorRequestToClient(message : String, address : SocketAddress){

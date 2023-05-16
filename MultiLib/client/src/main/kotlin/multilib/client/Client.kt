@@ -33,7 +33,6 @@ class Client : Channel(DatagramChannel.open()){
                  val bytes = ByteArray(buffer.remaining())
                  buffer.get(bytes)
                  data = (String(bytes))
-                 println(data)
              }
              return data
         }catch (e : PortUnreachableException){
