@@ -1,22 +1,27 @@
 package multilib.entrypoint
 
-import multilib.lib.list.Channel
-import multilib.lib.list.Parse
-import multilib.list.Deserialization
+import multilib.lib.list.*
+import multilib.list.*
 
 import java.net.InetSocketAddress
-import java.net.PortUnreachableException
 import java.net.SocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
 
 class EntryPoint : Channel(DatagramChannel.open()) {
     var serversList = mutableListOf<ConnectionList>()
+    private val deserializator = Deserialization()
     var clientList = mutableListOf<ConnectionList>()
+    var infoForClient : List<HashMap<String, String>> = emptyList()
+    private var EPAddr : SocketAddress
+    private val serverToClient : HashMap<SocketAddress , SocketAddress> = HashMap()
+    private val socketAddressInterpreter = SocketAddressInterpreter()
+
 
     init {
-        val address = InetSocketAddress("10.152.66.37", 3000)
+        val address = InetSocketAddress(Config.servAdr, 3000)
         this.channel.bind(address)
+        EPAddr = this.channel.localAddress
     }
     fun start(){
         println("Entry Point is running.")
@@ -26,20 +31,85 @@ class EntryPoint : Channel(DatagramChannel.open()) {
             buffer.flip()
             val bytes = ByteArray(buffer.remaining())
             buffer.get(bytes)
-            val data = String(bytes)
-            val addr = ConnectionList(socketAddress)
-            if (!this.clientList.contains(addr) && this.serversList.isNotEmpty()) {
-                this.clientList.add(addr)
-                val freeServerAddress = this.serversList.first().getAddr()
-                send(ByteBuffer.wrap(data.toByteArray()), freeServerAddress)
-            } else {
-                this.receive(this.channel, socketAddress, data)
-            }
+            val request = deserializeRequest(String(bytes))
+            operateRequest(request, socketAddress)
+            println(String(bytes))
         }
     }
 
-    private fun receive(channel: DatagramChannel, socketAddress: SocketAddress, data : String){
-        val deserializationSegment = Deserialization().deserializeAnswer(data)
-        val commandAndArguments = Parse.Parse().parseToServer(deserializationSegment)
+    private fun checkServer(addr : SocketAddress){
+        var checker = false
+        if (serversList.isEmpty()){
+            serversList.add(ConnectionList(addr))
+            println("New Server is connected with $addr")
+
+        }else{
+            for (address in serversList){
+                if (address.getAddr() == addr){
+                    checker = true
+                }
+            }
+            if (!checker){
+                serversList.add(ConnectionList(addr))
+                println("New Server is connected with $addr")
+            }
+        }
+    }
+    private fun checkClient(addr: SocketAddress){
+        var checker = false
+        if (clientList.isEmpty()){
+            clientList.add(ConnectionList(addr))
+            println("New Client is connected with $addr")
+        }else{
+            for (address in clientList){
+                if (address.getAddr() == addr){
+                    checker = true
+                }
+            }
+            if (!checker){
+                clientList.add(ConnectionList(addr))
+            }
+        }
+    }
+    private fun operateRequest(request: Request, addr : SocketAddress){
+        //Пришёл SocketAddress отправителя и его месага
+        if (checkMess(request)){
+            serverManager(request, addr)
+        }else{
+            clientManager(request, addr)
+        }
+    }
+    private fun checkMess(request: Request) : Boolean{
+            return request.who == 1
+    }
+    private fun serverManager(request: Request, address : SocketAddress){
+        checkServer(address) //Добавили сервер в список (если его там не было).
+        val message = request.message.message
+        if (message.contains("try to connect")){
+            sendRequestToServer(Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), "success")))
+        }else{
+            resendAnswerToClient(request)
+        }
+    }
+    private fun clientManager(request: Request, address: SocketAddress){
+        checkClient(address) //Добавили клиента в список (если его там не было)
+        if (serversList.isNotEmpty()){
+            sendRequestToServer(request)
+        }else{
+            sendErrorRequestToClient("Нет ни одного рабочего сервера, отправьте свой запрос позже.", address)
+        }
+    }
+    private fun sendRequestToServer(request: Request){
+        val serverAddress = serversList[0].getAddr()
+        serverToClient[serverAddress] = request.getFrom()
+        send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), serverAddress)
+    }
+    private fun sendErrorRequestToClient(message : String, address : SocketAddress){
+        val answer = Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), message))
+        send(ByteBuffer.wrap(serializeRequest(answer).toByteArray()), address)
+    }
+    private fun resendAnswerToClient(request: Request){
+        val clientAddress = request.getSender()
+        send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), clientAddress)
     }
 }

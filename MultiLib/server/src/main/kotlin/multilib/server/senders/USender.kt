@@ -1,6 +1,9 @@
 package multilib.app.senders
 
 import multilib.app.commands.stack
+import multilib.lib.list.MessageDto
+import multilib.lib.list.Request
+import multilib.lib.list.serializeRequest
 import multilib.list.Serialization
 import java.net.SocketAddress
 import java.nio.ByteBuffer
@@ -12,25 +15,41 @@ class USender : Sender {
     var channel : DatagramChannel? = null
     var addr : SocketAddress? = null
     var sendStack = ""
-    override fun print(string: String) {
+    private var clientAddress : SocketAddress? = null
+    override fun print(message: MessageDto) {
         if (!stack){
+
             if (sendStack == ""){
-                val answerServer = Serialization().serializeAnswer(string)
                 channel = manager!!.getChannel()
                 addr = manager!!.getAddress()
+                val request = Request(clientAddress!!, channel!!.localAddress!!, 1, message)
+                val answerServer = serializeRequest(request)
+
                 channel!!.send(ByteBuffer.wrap(answerServer.toByteArray()), addr)
             }else{
-                val answerServer = Serialization().serializeAnswer(sendStack)
                 channel = manager!!.getChannel()
                 addr = manager!!.getAddress()
+                val request = Request(clientAddress!!, channel!!.localAddress, 1, message)
+                val answerServer = serializeRequest(request)
                 channel!!.send(ByteBuffer.wrap(answerServer.toByteArray()), addr)
                 sendStack = ""
             }
         }else{
-            sendStack += string +"\n"
+            sendStack += message.message +"\n"
         }
     }
-    fun newManager(manager: ChannelAndAddressManager){
+    fun newManager(manager: ChannelAndAddressManager) {
         this.manager = manager
+    }
+    fun setClient(address : SocketAddress){
+        this.clientAddress = address
+    }
+    fun print(line : String){
+        channel = manager!!.getChannel()
+        addr = manager!!.getAddress()
+        val request = Request(clientAddress!!, channel!!.localAddress!!, 1, MessageDto(emptyList(), line))
+        val answerServer = serializeRequest(request)
+
+        channel!!.send(ByteBuffer.wrap(answerServer.toByteArray()), addr)
     }
 }

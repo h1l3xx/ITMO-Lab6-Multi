@@ -2,13 +2,12 @@ package multilib.app.server
 
 
 import multilib.app.commands.Clear
-import multilib.app.commands.Load
 import multilib.app.commands.tools.Validator
 import multilib.app.operator
 import multilib.app.senders.ChannelAndAddressManager
 import multilib.app.uSender
-import multilib.lib.list.Channel
-import multilib.lib.list.Parse
+import multilib.lib.list.*
+import multilib.list.Config
 import multilib.list.Deserialization
 import multilib.list.Serialization
 
@@ -20,12 +19,18 @@ import java.nio.channels.DatagramChannel
 class UpdServer : Channel(DatagramChannel.open()) {
 
     private var running = true
+    private val deserializator = Deserialization()
+    private val serializator = Serialization()
+    private val socketAddressInter = SocketAddressInterpreter()
     var clientsAddress = mutableListOf<SocketAddress>()
+    private val entryPointAddress : SocketAddress = InetSocketAddress(Config.servAdr, Config.port)
 
     fun run(){
 
-        val address = InetSocketAddress("10.152.66.37", 3000)
-        this.channel.bind(address)
+        this.channel.bind(null)
+        this.channel.connect(entryPointAddress)
+        val request = Request(this.channel.localAddress, entryPointAddress, 1, MessageDto(emptyList(), "try to connect"))
+        this.channel.send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), entryPointAddress)
         println("Server is running.")
 
         while (this.running){
@@ -35,39 +40,52 @@ class UpdServer : Channel(DatagramChannel.open()) {
             val bytes = ByteArray(buffer.remaining())
             buffer.get(bytes)
             val data = String(bytes)
-            if (!this.clientsAddress.contains(socketAddress)) {
+            if (data.contains("success")) {
                 this.clientsAddress.add(socketAddress)
-                firstConnection(socketAddress)
-                setChannelAndSocket(this.channel, socketAddress)
+                firstConnection(socketAddress, this.channel)
             } else {
-                this.receive(this.channel, socketAddress, data)
+                this.receive(data)
             }
         }
     }
 
-    private fun receive(channel: DatagramChannel, socketAddress: SocketAddress, data : String){
-        val deserializationSegment = Deserialization().deserializeAnswer(data)
-        val commandAndArguments = Parse.Parse().parseToServer(deserializationSegment)
-        operator.runCommand(commandAndArguments.drop(1).dropLast(1))
+    private fun receive(data : String){
+        val deserializationRequest = deserializeRequest(data)
+        val address = deserializationRequest.getFrom()
+
+        uSender.setClient(address)
+
+        val commandAndArguments = deserializationRequest.message
+        //println("first print ${commandAndArguments.values.first()}")
+        //println("second print${deserializator.deserializeAnswer(commandAndArguments.values.first())}")
+        //println("last print ${deserializator.deserializeAnswer(commandAndArguments.values.first()).message.values.first()}")
+        if (checkForCommandList(commandAndArguments.message)){
+            val map = Validator().takeAllInfoFromCommand()
+
+            uSender.print(MessageDto(map, "It's all commands"))
+        }else{
+            val line = deserializationRequest
+            println(line)
+            println(line.message)
+            println(line.message.message)
+        operator.runCommand(deserializationRequest.message.message)
+        }
     }
 
-    private fun firstConnection(socketAddress: SocketAddress){
-        val printAddress = socketAddress.toString().split(":")[0].drop(1)
-        println("New client : $printAddress")
-
+    private fun firstConnection(socketAddress: SocketAddress, channel: DatagramChannel){
+        println("Successful connection to Entry Point")
+        setChannelAndSocket(socketAddress, channel)
         Clear().comply(HashMap())
-        //Load().comply(HashMap())
-        this.channel.send(ByteBuffer.wrap(Serialization().serialize(Validator().takeAllInfoFromCommand())!!.toByteArray()), socketAddress)
     }
     fun stop(){
         this.running = false
     }
-    private fun setChannelAndSocket(channel: DatagramChannel, socketAddress : SocketAddress){
-        val manager = ChannelAndAddressManager()
-
-        manager.setChannel(channel)
-        manager.setAddress(socketAddress)
+    private fun setChannelAndSocket(socketAddress: SocketAddress, channel: DatagramChannel){
+        val manager = ChannelAndAddressManager(channel, socketAddress)
 
         uSender.newManager(manager)
+    }
+    private fun checkForCommandList(command : String) : Boolean{
+        return command.toString().contains("commandList")
     }
 }

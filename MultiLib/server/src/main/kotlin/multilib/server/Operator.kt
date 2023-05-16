@@ -2,6 +2,7 @@ package multilib.app
 
 
 import multilib.app.commands.ExecuteScript
+import multilib.lib.list.MessageDto
 import java.util.*
 
 object Strings {
@@ -11,20 +12,6 @@ object Strings {
 
 var sc = Scanner(System.`in`)
 class Operator {
-
-    fun process(wayToFile : String) : Boolean{
-
-        uSender.print ( Strings.START_STRING )
-
-        val wayToFile  = wayToFile
-
-        val firstCommand = "load $wayToFile"
-
-        runCommand(firstCommand)
-
-        return false
-    }
-
     fun runCommand(command: String){
         if (command.contains(ExecuteScript().getName())){
             val exAndCom = command.split(", ")
@@ -34,6 +21,7 @@ class Operator {
         val commandAndArguments = command.split(" ")
         val name = commandAndArguments[0]
         val arguments = commandAndArguments.drop(1)
+        println(name)
         if (!name.contains(ExecuteScript().getName())) {
 
 
@@ -52,7 +40,7 @@ class Operator {
                     commandManager.manage(name, arguments)
                 }
             } else {
-                uSender.print(Messages.MESSAGE)
+                uSender.print(MessageDto(emptyList(), Messages.MESSAGE))
             }
         }
     }

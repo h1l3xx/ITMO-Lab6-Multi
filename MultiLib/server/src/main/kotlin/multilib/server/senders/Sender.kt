@@ -1,6 +1,8 @@
 package multilib.app.senders
 
+import multilib.lib.list.MessageDto
+
 interface Sender {
-    fun print(str : String) {
+    fun print(message : MessageDto) {
     }
 }

@@ -4,6 +4,7 @@
 
 plugins {
     id("multilib.kotlin-library-conventions")
+    kotlin("plugin.serialization") version "1.8.10"
 }
 
 dependencies {

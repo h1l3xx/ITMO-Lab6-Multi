@@ -2,6 +2,9 @@ package multilib.client
 
 import multilib.client.handkers.Connect
 import multilib.lib.list.Channel
+import multilib.lib.list.MessageDto
+import multilib.lib.list.Request
+import multilib.lib.list.serializeRequest
 import multilib.list.Config
 import multilib.list.Serialization
 import java.net.InetSocketAddress
@@ -30,6 +33,7 @@ class Client : Channel(DatagramChannel.open()){
                  val bytes = ByteArray(buffer.remaining())
                  buffer.get(bytes)
                  data = (String(bytes))
+                 println(data)
              }
              return data
         }catch (e : PortUnreachableException){
@@ -37,8 +41,9 @@ class Client : Channel(DatagramChannel.open()){
              return ""
         }
     }
-    fun sendMessage(mess: HashMap<String,String>) {
-        send(ByteBuffer.wrap(Serialization().serializeMap(mess)!!.toByteArray()), entryPointAddress)
+    fun sendMessage(mess: String) {
+        val request = Request(channel.localAddress, entryPointAddress, 0, MessageDto(emptyList(), mess))
+        send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), entryPointAddress)
     }
 }
     //private val serverAddress: SocketAddress = InetSocketAddress(Config.servAdr,Config.port)

@@ -15,7 +15,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 object Messages {
-    const val MESSAGE = "Некорректное количество передаваемых аргументов. Точнее можно узнать в команде help. client"
+    const val MESSAGE = "Некорректное количество передаваемых аргументов. Точнее можно узнать в команде help."
     const val errorValue = "Указано некорректное значение. Введите команду повторно."
     const val errorType = "Ошибка в типе данных"
     const val errorField = "Ошибка. Указанного поля не существует."

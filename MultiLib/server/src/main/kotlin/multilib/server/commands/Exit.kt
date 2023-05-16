@@ -5,6 +5,7 @@ import multilib.app.commands.tools.Result
 import multilib.app.commands.tools.ArgsInfo
 import multilib.app.commands.tools.SetMapForCommand
 import multilib.app.uSender
+import multilib.lib.list.MessageDto
 
 
 object Message {
@@ -16,7 +17,7 @@ class Exit : Command {
     private val printer = uSender
     private val argsInfo = ArgsInfo()
     override fun comply(variables: HashMap<String, Any>): Result {
-        printer.print ( Message.MESSAGE )
+        printer.print (MessageDto(emptyList(), Message.MESSAGE ))
         Save().comply(HashMap())
         return Result("Команда выполнена", false)
     }

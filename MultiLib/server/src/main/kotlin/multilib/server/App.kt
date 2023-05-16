@@ -21,7 +21,6 @@ val validator = Validator()
 fun main(){
     commandManager.register(Add(), Clear(), ExecuteScript(), Exit(), FilterContainsName(), Help(), Info(),
         PrintAscending(), RemoveAllByMetersAboveSeaLevel(), RemoveAt(), RemoveById(), RemoveLower(), Show(), Sort(), UpdateById())
-    println(Serialization().serialize(validator.takeAllInfoFromCommand()))
 
     UpdServer().run()
 

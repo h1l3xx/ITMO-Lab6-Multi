@@ -8,6 +8,7 @@ import multilib.app.commands.tools.SetMapForCommand
 import multilib.app.commands.tools.VarsShaper
 import multilib.app.operator
 import multilib.app.uSender
+import multilib.lib.list.MessageDto
 
 import java.util.*
 
@@ -34,7 +35,7 @@ class ExecuteScript: Command{
                 }
             }
         }catch (e : Exception){
-            uSender.print("Ошибка. Проверьте корректность данных в скрипте.")
+            uSender.print(MessageDto(emptyList(), "Ошибка. Проверьте корректность данных в скрипте."))
         }
 
         stack = false

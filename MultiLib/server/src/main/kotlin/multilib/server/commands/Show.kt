@@ -6,6 +6,7 @@ import multilib.app.commands.tools.ArgsInfo
 import multilib.app.commands.tools.Result
 import multilib.app.commands.tools.SetMapForCommand
 import multilib.app.uSender
+import multilib.lib.list.MessageDto
 
 
 class Show : Command {
@@ -19,11 +20,11 @@ class Show : Command {
             for (c in collection) {
                 sendValue += c.toString() + "\n"
             }
-            uSender.print(sendValue)
+            uSender.print(MessageDto(emptyList(), sendValue))
 
         } else {
             sendValue = "Коллекция пуста"
-            uSender.print (sendValue)
+            uSender.print (MessageDto(emptyList(), sendValue))
         }
 
         return Result("Команда выполнена успешно.", false)

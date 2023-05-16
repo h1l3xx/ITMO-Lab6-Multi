@@ -6,6 +6,7 @@ import multilib.app.commands.tools.ArgsInfo
 import multilib.app.commands.tools.Result
 import multilib.app.commands.tools.SetMapForCommand
 import multilib.app.uSender
+import multilib.lib.list.MessageDto
 
 
 class Help : Command{
@@ -18,7 +19,7 @@ class Help : Command{
         for (command in commandDescriptionList) {
             returnValue += "${command.key}  ---  ${command.value}\n"
         }
-        uSender.print(returnValue)
+        uSender.print(MessageDto(emptyList(), returnValue))
         return Result("Команда успешно выполнена", false)
     }
 

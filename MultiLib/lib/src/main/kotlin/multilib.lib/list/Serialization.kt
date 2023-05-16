@@ -2,18 +2,18 @@ package multilib.list
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import multilib.lib.list.Request
+import java.net.SocketAddress
+
 class Serialization {
-    fun serialize(data : List<HashMap<String, String>>): String? {
-        val mapper = ObjectMapper()
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data)
-    }
-    fun serializeAnswer(data : String) : String {
-        val answer = MapBuilder().buildMap(data)
-        val mapper = ObjectMapper()
-        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(answer)
-    }
-    fun serializeMap(data: HashMap<String,String>): String? {
-        val mapper = ObjectMapper().registerModule(JavaTimeModule())
-        return mapper.writeValueAsString(data)
-    }
+//    fun serializeRequest(request : Request) : String?{
+//        val mapper = ObjectMapper()
+//        val map = mapOf(
+//            "sender" to request.sender,
+//            "from" to request.from,
+//            "who" to request.who,
+//            "message" to request.message
+//        )
+//        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(map)
+//    }
 }

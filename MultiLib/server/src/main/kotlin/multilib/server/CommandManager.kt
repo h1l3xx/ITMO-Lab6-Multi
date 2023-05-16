@@ -2,6 +2,7 @@ package multilib.app
 
 import multilib.app.commands.Command
 import multilib.app.commands.tools.Values
+import multilib.lib.list.MessageDto
 
 
 object Messages {
@@ -18,7 +19,7 @@ class CommandManager {
             val variables = commandList[name]!!.argContract(arguments)
             val result = commandList[name]!!.comply(variables)
             if (result.getBool()){
-                uSender.print ( result.getMessage() )
+                uSender.print (MessageDto(emptyList(), result.getMessage() ))
             }
         }
     }
@@ -42,13 +43,13 @@ class CommandManager {
         val info = commandList[name]!!.argsInfo()
         val size = arguments.size
         if (size > info[Values.max]!! || size < info[Values.min]!!){
-            uSender.print ( Messages.MESSAGE )
+            uSender.print (MessageDto(emptyList(), Messages.MESSAGE ))
             return false}
         else if (size < info[Values.max]!! && size > info[Values.min]!! && info[Values.between] == 0) {
-            uSender.print ( Messages.MESSAGE )
+            uSender.print (MessageDto(emptyList(),  Messages.MESSAGE ))
             return false
         }else if ((info[Values.max] == info[Values.min]) && info[Values.max] != size){
-            uSender.print ( Messages.MESSAGE )
+            uSender.print (MessageDto(emptyList(), Messages.MESSAGE ))
             return false
         }
         return true
