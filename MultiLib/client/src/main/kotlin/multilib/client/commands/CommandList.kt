@@ -3,6 +3,8 @@ package multilib.client.commands
 import multilib.client.manager
 
 object Var{
+    const val errorServer = "Нет ни одного рабочего сервера. Повторная попытка запроса через 10 секунд."
+    const val errorEP = "Отсутвует подключение к Entry Point. Повторная попытка запроса через 10 секунд."
     const val choose = "choose"
     const val add = "add"
     const val id = "id"

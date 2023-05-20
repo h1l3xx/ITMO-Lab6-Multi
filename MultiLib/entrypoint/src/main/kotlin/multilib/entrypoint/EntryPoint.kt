@@ -11,13 +11,10 @@ import kotlin.system.exitProcess
 
 class EntryPoint : Channel(DatagramChannel.open()) {
     var serversList = mutableListOf<ConnectionList>()
-    private val deserializator = Deserialization()
     var clientList = mutableListOf<ConnectionList>()
-    var infoForClient : List<HashMap<String, String>> = emptyList()
-    private var EPAddr : SocketAddress
-    private val serverToClient : HashMap<SocketAddress , SocketAddress> = HashMap()
-    private val socketAddressInterpreter = SocketAddressInterpreter()
 
+    var EPAddr : SocketAddress
+    val balancer = Balancer()
 
     init {
         val address = InetSocketAddress(Config.servAdr, 3000)
@@ -38,10 +35,11 @@ class EntryPoint : Channel(DatagramChannel.open()) {
         }
     }
 
-    private fun checkServer(addr : SocketAddress){
+    private infix fun checkServer(addr : SocketAddress){
         var checker = false
         if (serversList.isEmpty()){
             serversList.add(ConnectionList(addr))
+            balancer.addServerToLoud(addr)
             println("New Server is connected with $addr")
 
         }else{
@@ -53,10 +51,11 @@ class EntryPoint : Channel(DatagramChannel.open()) {
             if (!checker){
                 serversList.add(ConnectionList(addr))
                 println("New Server is connected with $addr")
+                balancer.addServerToLoud(addr)
             }
         }
     }
-    private fun checkClient(addr: SocketAddress){
+    private infix fun checkClient(addr: SocketAddress){
         var checker = false
         if (clientList.isEmpty()){
             clientList.add(ConnectionList(addr))
@@ -74,44 +73,48 @@ class EntryPoint : Channel(DatagramChannel.open()) {
     }
     private fun operateRequest(request: Request, addr : SocketAddress){
         //Пришёл SocketAddress отправителя и его месага
-        if (checkMess(request)){
+        if (this checkMess request){
             serverManager(request, addr)
         }else{
             clientManager(request, addr)
         }
     }
-    private fun checkMess(request: Request) : Boolean{
+    private infix fun checkMess(request: Request) : Boolean{
             return request.who == 1
     }
     private fun serverManager(request: Request, address : SocketAddress){
-        checkServer(address) //Добавили сервер в список (если его там не было).
+        this checkServer address //Добавили сервер в список (если его там не было).
         val message = request.message.message
         println(message)
         if (message.contains("try to connect")){
             sendRequestToServer(Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), "success")), address)
         }else{
-            resendAnswerToClient(request)
+            this resendAnswerToClient request
         }
     }
     private fun clientManager(request: Request, address: SocketAddress){
-        checkClient(address) //Добавили клиента в список (если его там не было)
+        this checkClient address //Добавили клиента в список (если его там не было)
         if (serversList.isNotEmpty()){
             sendRequestToServer(request, address)
         }else{
-            sendErrorRequestToClient("Нет ни одного рабочего сервера, отправьте свой запрос позже.", address)
+            sendErrorRequestToClient(Var.errorServer, address)
         }
     }
     private fun sendRequestToServer(request: Request, clientAddress : SocketAddress){
-        val serverAddress = serversList[0].getAddr()
+        val serverAddress = balancer.balance()
         request.from = clientAddress.toString()
+        balancer increment serverAddress
         send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), serverAddress)
+
     }
     private fun sendErrorRequestToClient(message : String, address : SocketAddress){
         val answer = Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), message))
         send(ByteBuffer.wrap(serializeRequest(answer).toByteArray()), address)
     }
-    private fun resendAnswerToClient(request: Request){
+    private infix fun resendAnswerToClient(request: Request){
         val clientAddress = request.getSender()
+        val serverAddress = request.getFrom()
+        balancer decrement serverAddress
         send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), clientAddress)
     }
 }

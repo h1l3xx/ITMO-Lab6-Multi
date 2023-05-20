@@ -8,8 +8,6 @@ import multilib.app.senders.ChannelAndAddressManager
 import multilib.app.uSender
 import multilib.lib.list.*
 import multilib.list.Config
-import multilib.list.Deserialization
-import multilib.list.Serialization
 
 import java.net.InetSocketAddress
 import java.net.SocketAddress
@@ -19,9 +17,6 @@ import java.nio.channels.DatagramChannel
 class UpdServer : Channel(DatagramChannel.open()) {
 
     private var running = true
-    private val deserializator = Deserialization()
-    private val serializator = Serialization()
-    private val socketAddressInter = SocketAddressInterpreter()
     var clientsAddress = mutableListOf<SocketAddress>()
     private val entryPointAddress : SocketAddress = InetSocketAddress(Config.servAdr, Config.port)
 
@@ -56,18 +51,14 @@ class UpdServer : Channel(DatagramChannel.open()) {
         uSender.setClient(address)
 
         val commandAndArguments = deserializationRequest.message
-        //println("first print ${commandAndArguments.values.first()}")
-        //println("second print${deserializator.deserializeAnswer(commandAndArguments.values.first())}")
-        //println("last print ${deserializator.deserializeAnswer(commandAndArguments.values.first()).message.values.first()}")
+
         if (checkForCommandList(commandAndArguments.message)){
             val map = Validator().takeAllInfoFromCommand()
 
             uSender.print(MessageDto(map, "It's all commands"))
         }else{
-            val line = deserializationRequest
-            println(line)
-            println(line.message)
-            println(line.message.message)
+
+            println(deserializationRequest.message.message)
         operator.runCommand(deserializationRequest.message.message)
         }
     }
@@ -86,6 +77,6 @@ class UpdServer : Channel(DatagramChannel.open()) {
         uSender.newManager(manager)
     }
     private fun checkForCommandList(command : String) : Boolean{
-        return command.toString().contains("commandList")
+        return command.contains("commandList")
     }
 }

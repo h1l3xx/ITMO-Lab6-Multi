@@ -1,26 +1,25 @@
 package multilib.client
 
+import multilib.client.commands.Var
 import multilib.client.handkers.Connect
-import multilib.lib.list.Channel
-import multilib.lib.list.MessageDto
-import multilib.lib.list.Request
-import multilib.lib.list.serializeRequest
+import multilib.lib.list.*
 import multilib.list.Config
-import multilib.list.Serialization
 import java.net.InetSocketAddress
 import java.net.PortUnreachableException
 import java.net.SocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
+import kotlin.system.exitProcess
 
 
 class Client : Channel(DatagramChannel.open()){
     private val entryPointAddress : SocketAddress = InetSocketAddress(Config.servAdr, Config.port)
+    private val connect = Connect()
     init {
         this.channel.bind(null)
         this.channel.connect(entryPointAddress)
     }
-    fun getMessage() : String{
+    fun getMessage() : Request{
         try {
              var data: String? = null
              while (data.isNullOrEmpty()) {
@@ -34,47 +33,17 @@ class Client : Channel(DatagramChannel.open()){
                  buffer.get(bytes)
                  data = (String(bytes))
              }
-             return data
+             return deserializeRequest(data)
         }catch (e : PortUnreachableException){
-             Connect().tryAgain()
-             return ""
+            connect.tryAgain()
+            return Request(channel.localAddress, channel.localAddress, 0, MessageDto(emptyList(), Var.errorEP))
         }
     }
-    fun sendMessage(mess: String) {
+    fun stop(){
+        exitProcess(1)
+    }
+    infix fun sendMessage(mess: String) {
         val request = Request(channel.localAddress, entryPointAddress, 0, MessageDto(emptyList(), mess))
         send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), entryPointAddress)
     }
 }
-    //private val serverAddress: SocketAddress = InetSocketAddress(Config.servAdr,Config.port)
-            //private val channel: DatagramChannel = DatagramChannel.open()
-            //
-            //init {
-    //    channel.bind(null)
-            //    channel.connect(serverAddress)
-            //    channel.configureBlocking(false)
-            //}
-            //
-            //fun getMessage(): String {
-    //    try {
-    //        var data: String? = null
-                    //        while (data.isNullOrEmpty()) {
-//
-    //            val buffer: ByteBuffer = ByteBuffer.allocate(65535)
-                        //
-                        //            channel.receive(buffer)
-                        //
-                        //            buffer.flip()
-                        //            val bytes = ByteArray(buffer.remaining())
-                        //            buffer.get(bytes)
-                        //            data = (String(bytes))
-                        //        }
-                    //        return data
-                    //    }catch (e : PortUnreachableException){
-    //        Connect().tryAgain()
-                    //        return ""
-                    //    }
-                //}
-            //
-            //fun sendMessage(mess: HashMap<String,String>) {
-    //    channel.send(ByteBuffer.wrap(Serialization().serializeMap(mess)!!.toByteArray()), serverAddress)
-                //}

@@ -1,6 +1,6 @@
 package multilib.list
 object Var{
-
+    const val errorServer = "Нет ни одного рабочего сервера. Повторная попытка запроса через 10 секунд."
     const val id = "id"
     const val name = "name"
     const val coordinateX = "coordX"

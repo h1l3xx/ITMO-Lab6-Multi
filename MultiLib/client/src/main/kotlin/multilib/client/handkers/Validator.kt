@@ -29,7 +29,7 @@ class Validator {
         }
     }
 
-    fun checkCommand(command: String) : Boolean{
+    infix fun checkCommand(command: String) : Boolean{
         val list = listOf(commandList.keys.toString())
         for (i in list){
             val commands = i.drop(1).dropLast(1).split(", ")
@@ -92,7 +92,7 @@ class Validator {
                 }
             }
             Var.birthday -> {
-                val value = setBirthday(argument)
+                val value = this setBirthday argument
                 if(value == Messages.errorValue){
                     return Messages.errorValue
                 }else return value
@@ -123,14 +123,14 @@ class Validator {
             Messages.errorValue
         }
     }
-    private fun setBirthday(birthday : String): String{
-        return if (checkBirthday(birthday)) {
+    private infix fun setBirthday(birthday : String): String{
+        return if (this checkBirthday birthday) {
             return birthday
         } else {
             Messages.errorValue
         }
     }
-    private fun checkBirthday(birthday : String) : Boolean{
+    private infix fun checkBirthday(birthday : String) : Boolean{
         return try {
             val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
             val date: LocalDate = LocalDate.parse(birthday, formatter)
@@ -142,7 +142,7 @@ class Validator {
     }
 
 
-    fun validateMoreArg(arguments: List<String>) : Any {
+    infix fun validateMoreArg(arguments: List<String>) : Any {
         val checker = CheckFiled()
         return if(checker.check(arguments[0])){
             val type = checker.getType(arguments[0])
@@ -215,7 +215,7 @@ class Validator {
             false
         }
     }
-    fun allFields(arguments: List<String>) : String {
+    infix fun allFields(arguments: List<String>) : String {
         var returnValue = ""
         if (arguments.isNotEmpty() && checkToInt(arguments[0]) && arguments.size != 1) {
             returnValue += arguments[0] + " "
@@ -278,7 +278,7 @@ class Validator {
         }
         return arguments
     }
-    fun workWithFile(a: List<String>) : List<String> {
+    infix fun workWithFile(a: List<String>) : List<String> {
         val returnValue = FileManager().file(a[0]).toString()
         if (!returnValue.contains("Рекурсия")){
             return FileManager().file(a[0]).toString().split(" ,")

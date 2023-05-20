@@ -1,7 +1,7 @@
 package multilib.entrypoint
 
 
-
+val entryPoint = EntryPoint()
 fun main() {
-    EntryPoint().start()
+    entryPoint.start()
 }
