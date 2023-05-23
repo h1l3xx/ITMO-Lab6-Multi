@@ -1,11 +1,13 @@
 package multilib.app.commands
 
 
-import multilib.app.collection
+import multilib.server.collection
 import multilib.app.commands.tools.*
 
 
 class UpdateById : Command {
+    override val hidden: Boolean
+        get() = true
     private val argsInfo = ArgsInfo()
     private val updater = CityUpdater()
     private var detector = false

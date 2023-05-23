@@ -3,6 +3,8 @@ package multilib.app.commands
 import multilib.app.commands.tools.Result
 
 interface Command {
+
+    val hidden : Boolean
     fun comply(variables: HashMap<String, Any>): Result
     fun getDescription(): String
     fun getName(): String

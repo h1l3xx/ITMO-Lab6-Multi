@@ -3,9 +3,9 @@ package multilib.app.commands.tools
 
 
 import multilib.app.commands.Clear
-import multilib.app.operator
+import multilib.server.operator
 import multilib.app.sc
-import multilib.app.uSender
+import multilib.server.uSender
 
 
 class CheckScript {

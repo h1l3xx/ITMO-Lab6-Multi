@@ -4,7 +4,7 @@ package multilib.app.commands.tools
 
 import multilib.app.commands.Var
 import multilib.app.sc
-import multilib.app.uSender
+import multilib.server.uSender
 
 
 class CheckArg {

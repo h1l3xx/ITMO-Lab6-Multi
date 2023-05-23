@@ -1,15 +1,19 @@
 package multilib.app.commands
 
 
-import multilib.app.commandManager
+import multilib.server.commandManager
 import multilib.app.commands.tools.ArgsInfo
 import multilib.app.commands.tools.Result
 import multilib.app.commands.tools.SetMapForCommand
-import multilib.app.uSender
+import multilib.server.uSender
 import multilib.lib.list.MessageDto
 
 
 class Help : Command{
+
+    override val hidden: Boolean
+        get() = true
+
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
 

@@ -2,7 +2,7 @@ package multilib.app.commands
 
 
 import multilib.app.city.arrayFreeId
-import multilib.app.collection
+import multilib.server.collection
 import multilib.app.commands.tools.ArgsInfo
 import multilib.app.commands.tools.CheckArg
 import multilib.app.commands.tools.Result
@@ -10,6 +10,9 @@ import multilib.app.commands.tools.SetMapForCommand
 
 
 class RemoveAt : Command {
+
+    override val hidden: Boolean
+        get() = true
     private val argsInfo = ArgsInfo()
     private val checkArg = CheckArg()
     private val setMapForCommand = SetMapForCommand()

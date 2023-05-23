@@ -3,7 +3,7 @@ package multilib.app.city
 
 
 
-import multilib.app.collection
+import multilib.server.collection
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 

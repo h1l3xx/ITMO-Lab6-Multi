@@ -13,6 +13,11 @@ class Validator {
     private var inline : Boolean? = null
     private var commandName : String? = null
     private var text : String? = null
+    private var hidden : Boolean? = null
+
+    fun setHidden(hidden : Boolean){
+        this.hidden = hidden
+    }
 
     fun setCommandName(name : String){
         this.commandName = name
@@ -36,6 +41,7 @@ class Validator {
         returnMap[Values.min] = min.toString()
         returnMap[Values.between] = inline.toString()
         returnMap[Var.description] = text.toString()
+        returnMap[Var.hidden] = hidden.toString()
 
         return returnMap
     }

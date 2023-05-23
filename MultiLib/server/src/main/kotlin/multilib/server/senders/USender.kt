@@ -15,6 +15,7 @@ class USender : Sender {
     var addr : SocketAddress? = null
     var sendStack = ""
     private var clientAddress : SocketAddress? = null
+    private var lastMessage : Request? = null
     override fun print(message: MessageDto) {
         if (!stack){
 
@@ -25,12 +26,14 @@ class USender : Sender {
                 val answerServer = serializeRequest(request)
 
                 channel!!.send(ByteBuffer.wrap(answerServer.toByteArray()), addr)
+                this setLast request
             }else{
                 channel = manager!!.getChannel()
                 addr = manager!!.getAddress()
                 val request = Request(clientAddress!!, channel!!.localAddress, 1, message)
                 val answerServer = serializeRequest(request)
                 channel!!.send(ByteBuffer.wrap(answerServer.toByteArray()), addr)
+                this setLast request
                 sendStack = ""
             }
         }else{
@@ -50,5 +53,15 @@ class USender : Sender {
         val answerServer = serializeRequest(request)
 
         channel!!.send(ByteBuffer.wrap(answerServer.toByteArray()), addr)
+        this setLast request
+    }
+    private infix fun setLast(request: Request){
+        this.lastMessage = request
+    }
+    fun resend(){
+        channel = manager!!.getChannel()
+        addr = manager!!.getAddress()
+        val answer = serializeRequest(this.lastMessage!!)
+        channel!!.send(ByteBuffer.wrap(answer.toByteArray()), addr)
     }
 }

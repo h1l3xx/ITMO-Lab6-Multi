@@ -10,7 +10,7 @@ import multilib.app.city.Climate
 import multilib.app.city.Government
 import multilib.app.commands.Var
 import multilib.app.sc
-import multilib.app.uSender
+import multilib.server.uSender
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime

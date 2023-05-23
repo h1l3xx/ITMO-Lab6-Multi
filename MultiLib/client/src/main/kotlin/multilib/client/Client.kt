@@ -12,6 +12,8 @@ import java.nio.channels.DatagramChannel
 import kotlin.system.exitProcess
 
 
+var connectToEP = false
+
 class Client : Channel(DatagramChannel.open()){
     private val entryPointAddress : SocketAddress = InetSocketAddress(Config.servAdr, Config.port)
     private val connect = Connect()
@@ -33,14 +35,18 @@ class Client : Channel(DatagramChannel.open()){
                  buffer.get(bytes)
                  data = (String(bytes))
              }
+            connectToEP = true
              return deserializeRequest(data)
         }catch (e : PortUnreachableException){
+            connectToEP = false
             connect.tryAgain()
             return Request(channel.localAddress, channel.localAddress, 0, MessageDto(emptyList(), Var.errorEP))
         }
     }
-    fun stop(){
-        exitProcess(1)
+    fun stop(line : String){
+        println(line)
+        println("Происходит отключение...")
+        exitProcess(21)
     }
     infix fun sendMessage(mess: String) {
         val request = Request(channel.localAddress, entryPointAddress, 0, MessageDto(emptyList(), mess))

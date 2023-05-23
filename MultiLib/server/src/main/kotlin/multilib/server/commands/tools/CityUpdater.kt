@@ -2,7 +2,7 @@ package multilib.app.commands.tools
 
 import multilib.app.city.City
 import multilib.app.city.arrayFreeId
-import multilib.app.collection
+import multilib.server.collection
 import multilib.app.commands.Add
 
 object Numbers {

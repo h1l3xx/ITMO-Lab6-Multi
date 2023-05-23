@@ -4,8 +4,9 @@ package multilib.app.commands
 import multilib.app.commands.tools.Result
 import multilib.app.commands.tools.ArgsInfo
 import multilib.app.commands.tools.SetMapForCommand
-import multilib.app.uSender
+import multilib.server.uSender
 import multilib.lib.list.MessageDto
+import multilib.server.commands.Save
 
 
 object Message {
@@ -13,11 +14,15 @@ object Message {
 }
 
 class Exit : Command {
+    override val hidden: Boolean
+        get() = true
+
     private val setMapForCommand = SetMapForCommand()
     private val printer = uSender
     private val argsInfo = ArgsInfo()
     override fun comply(variables: HashMap<String, Any>): Result {
         printer.print (MessageDto(emptyList(), Message.MESSAGE ))
+        println("Происходит сохранение...")
         Save().comply(HashMap())
         return Result("Команда выполнена", false)
     }

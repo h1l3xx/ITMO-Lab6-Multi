@@ -9,23 +9,23 @@ import multilib.client.handkers.Connect
 import multilib.client.handkers.Scanner
 import multilib.client.handkers.Messages
 import multilib.client.handkers.Validator
-import multilib.lib.list.MessageDto
 import multilib.lib.list.Request
-import multilib.lib.list.deserializeRequest
 import multilib.lib.list.printers.UPrinter
-
+import kotlin.concurrent.thread
 
 
 class Manager {
 
-    private val client = Client()
+
     val uPrinter = UPrinter()
     private val scanner = Scanner()
     private val validator = Validator()
+    private var running = true
     fun process(){
+        val client = Client()
         val validator = Validator()
         val commands = CommandList()
-        var running = true
+
 
 
         client sendMessage "commandList"
@@ -49,7 +49,7 @@ class Manager {
         }else{
             false
         }
-
+        this goPingEP client
         while (running){
 
             val command = scanner.readLine()
@@ -63,7 +63,7 @@ class Manager {
                 if (arguments.isNotEmpty() && arguments.last() == ""){
                     arguments = arguments.dropLast(1)
                 }
-                validator.manege(name, arguments)
+                validator.manege(name, arguments, client)
             }
             else{
                 uPrinter.print{ "Такой команды не существует. Узнать подробнее: help" }
@@ -71,20 +71,22 @@ class Manager {
         }
     }
 
-    fun continueManage(command : String, arguments : List<String>){
+    fun continueManage(command : String, arguments : List<String>, client : Client){
         if (arguments.isEmpty() && !commandList[command]!![Var.description]!!.contains(Var.allFields)){
 
+            println(command)
+            println(arguments)
             client sendMessage command
-            uPrinter.print { getMessage()}
+            uPrinter.print { getMessage(client)}
         }else{
-            if (validateArguments(command, arguments)){
-                uPrinter.print { getMessage()}
+            if (validateArguments(command, arguments, client)){
+                uPrinter.print { getMessage(client)}
             }
         }
     }
-    private fun validateArguments(c: String, a : List<String> ): Boolean{
+    private fun validateArguments(c: String, a : List<String>, client : Client): Boolean{
         val description = commandList[c]!![Var.description]!!
-        if (description != "" && !description.contains("field") && !description.contains(Var.wayToFile)){
+        if (description != "" && !description.contains("field") && !description.contains(Var.wayToFile) && c!="auth"&&c!="sing_up"){
             val returnValue = validator.validateOneArgument(a[0], description).toString()
             return if (this badValue returnValue){
                 uPrinter.print { returnValue }
@@ -94,6 +96,7 @@ class Manager {
                 true
             }
         }else if (!description.contains(Var.allFields)  && !description.contains(Var.wayToFile)){
+
             val returnValue = (validator validateMoreArg a).toString()
             return if (this badValue returnValue){
                 uPrinter.print { returnValue }
@@ -118,11 +121,11 @@ class Manager {
             return true
         }
     }
-    private fun getMessage(): String {
+    private fun getMessage(client: Client): String {
         return try{
             val value = client.getMessage()
             if(value.message.message == Var.exit){
-                client.stop()
+                client.stop("")
             }
             value.message.message
         }catch (e : Exception){
@@ -133,10 +136,21 @@ class Manager {
     private infix fun badValue(returnValue : String): Boolean{
         return returnValue == Messages.errorType || returnValue == Messages.errorField || returnValue == Messages.errorValue
     }
-    private infix fun checkMap(map : Request) : Boolean{
+    private infix fun checkMap(map : Request) : Boolean {
         return map.message.message == Var.errorServer || map.message.message == Var.errorEP
     }
-    private infix fun checkData(list : List<HashMap<String, String>>): Boolean {
-        return list.isNotEmpty()
+    private infix fun goPingEP(client: Client){
+        thread {
+            var run = connectToEP
+            while (run) {
+                Thread.sleep(8_000)
+                client sendMessage "ping from client"
+                val answer = client.getMessage().message.message
+                if (answer != "success"){
+                    client.stop("Sorry, EP is dead")
+                }
+                run = connectToEP
+            }
+        }
     }
 }

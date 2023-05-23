@@ -4,7 +4,7 @@ package multilib.app.commands
 
 import multilib.app.city.CityCompareByDefault
 import multilib.app.city.CityCreator
-import multilib.app.collection
+import multilib.server.collection
 import multilib.app.commands.tools.ArgsInfo
 import multilib.app.commands.tools.SetMapForCommand
 import multilib.app.commands.tools.VarsShaper
@@ -16,7 +16,9 @@ import java.time.format.DateTimeFormatter
 
 
 object Var{
-    const val save = "C:\\Users\\Sasha\\IdeaProjects\\Lab6-Server\\save.json"
+    const val login = "login"
+    const val password = "password"
+    const val hidden = "hidden"
     const val id = "id"
     const val name = "name"
     const val coordinateX = "coordX"
@@ -50,6 +52,9 @@ class Add : Command {
     private val setMapForCommand = SetMapForCommand()
     private val shaper = VarsShaper()
     private val argsInfo = ArgsInfo()
+
+    override val hidden: Boolean
+        get() = true
     override fun comply(variables: HashMap<String, Any>): Result {
 
 

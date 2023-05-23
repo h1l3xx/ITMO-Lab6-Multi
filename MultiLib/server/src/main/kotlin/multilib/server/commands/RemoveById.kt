@@ -2,7 +2,7 @@ package multilib.app.commands
 
 
 import multilib.app.city.arrayFreeId
-import multilib.app.collection
+import multilib.server.collection
 import multilib.app.commands.tools.ArgsInfo
 import multilib.app.commands.tools.MoreArgumentsInCommand
 import multilib.app.commands.tools.Result
@@ -10,6 +10,10 @@ import multilib.app.commands.tools.SetMapForCommand
 
 private var arrayOfId = emptyArray<Long>()
 class RemoveById : Command {
+
+
+    override val hidden: Boolean
+        get() = true
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
     private val c = collection.getCollection()

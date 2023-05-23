@@ -72,7 +72,7 @@ class City {
         this.id = id
     }
 
-    fun getCreationDate(): String = creationDate.toString()
+    fun getCreationDate(): LocalDateTime? = creationDate
     fun setCreationDate(creationDate: LocalDateTime?) {
         this.creationDate = creationDate
     }

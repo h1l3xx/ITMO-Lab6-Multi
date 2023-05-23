@@ -11,23 +11,14 @@ object Var{
     const val exec = "execute_script"
     const val name = "name"
     const val exit = "Происходит отключение от сервера..."
-    const val coordinateX = "coordX"
-    const val coordinateY = "coordY"
-    const val area = "area"
-    const val population = "population"
-    const val meters = "metersAboveOfSeaLevel"
-    const val agl = "agglomeration"
-    const val climate = "climate"
-    const val government = "government"
+    const val hidden = "hidden"
     const val birthday = "birthday"
-    const val age = "age"
-    const val index = "index"
     const val allFields = "all fields"
-    const val numberOfFields = "number of fields"
+
     const val wayToFile = "Way to File"
-    const val True = "True"
+
     const val False = "False"
-    const val numbersOfId = "numbers of id"
+
     const val description = "description"
     const val str = "String"
     const val long = "long"
@@ -51,10 +42,12 @@ class CommandList {
             preMap[Var.max] = list[i][Var.max].toString()
             preMap[Var.between] = list[i][Var.between].toString()
             preMap[Var.description] = list[i][Var.description].toString()
+            preMap[Var.hidden] = list[i][Var.hidden].toString()
 
             commandList[list[i][Var.name].toString()] = preMap
         }
         setFieldMap(list[list.lastIndex])
+
         return commandList
     }
 
@@ -63,7 +56,9 @@ class CommandList {
         val list = str.split(", ")
         manager.uPrinter.print { "Список доступных команд:" }
         for (word in list){
-            manager.uPrinter.print { word }
+            if (commandList[word]!![Var.hidden]!! == "true"){
+                manager.uPrinter.print { word }
+            }
         }
         manager.uPrinter.print { "Чтобы узнать поподробнее о каждой команде, воспользуйтесь командой help." }
     }

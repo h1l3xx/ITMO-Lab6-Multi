@@ -3,7 +3,7 @@ package multilib.app.commands.tools
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import multilib.app.city.City
-import multilib.app.collection
+import multilib.server.collection
 import java.io.FileReader
 
 

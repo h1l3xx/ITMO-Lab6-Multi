@@ -5,6 +5,9 @@ import multilib.app.commands.tools.SetMapForCommand
 import multilib.app.commands.tools.Result
 
 class PrintAscending : Command {
+
+    override val hidden: Boolean
+        get() = true
     private val argsInfo = ArgsInfo()
     private val sort = Sort()
     private val show = Show()

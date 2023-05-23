@@ -6,18 +6,19 @@ import multilib.app.commands.tools.ArgsInfo
 import multilib.app.commands.tools.Result
 import multilib.app.commands.tools.SetMapForCommand
 import multilib.app.commands.tools.VarsShaper
-import multilib.app.operator
-import multilib.app.uSender
+import multilib.server.operator
+import multilib.server.uSender
 import multilib.lib.list.MessageDto
 
 import java.util.*
 
 var stack = false
 class ExecuteScript: Command{
+    override val hidden: Boolean
+        get() = true
 
     private val setMapForCommand = SetMapForCommand()
     private val argsInfo = ArgsInfo()
-    private val shaper = VarsShaper()
     override fun comply(variables: HashMap<String, Any>): Result {
         stack = true
         try {

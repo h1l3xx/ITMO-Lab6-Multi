@@ -2,14 +2,18 @@ package multilib.app.commands
 import multilib.app.commands.tools.ArgsInfo
 import multilib.app.commands.tools.Parser
 import multilib.app.commands.tools.Result
+import multilib.server.database.DatabaseManager
 
 class Load : Command {
     val argsInfo = ArgsInfo()
-    private val parser = Parser()
+    override val hidden: Boolean
+        get() = true
+    private val databaseManger = DatabaseManager()
 
     override fun comply(variables: HashMap<String, Any>): Result {
 
-        parser.parse(Var.save)
+
+
         return Result("Загружено", true)
     }
 

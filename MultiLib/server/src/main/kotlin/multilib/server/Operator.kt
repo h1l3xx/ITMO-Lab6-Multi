@@ -3,6 +3,8 @@ package multilib.app
 
 import multilib.app.commands.ExecuteScript
 import multilib.lib.list.MessageDto
+import multilib.server.commandManager
+import multilib.server.uSender
 import java.util.*
 
 object Strings {
@@ -21,7 +23,6 @@ class Operator {
         val commandAndArguments = command.split(" ")
         val name = commandAndArguments[0]
         val arguments = commandAndArguments.drop(1)
-        println(name)
         if (!name.contains(ExecuteScript().getName())) {
 
 

@@ -4,6 +4,7 @@ package multilib.client.handkers
 
 
 
+import multilib.client.Client
 import multilib.client.commands.CheckFiled
 import multilib.client.commands.Var
 import multilib.client.commands.commandList
@@ -23,9 +24,9 @@ object Messages {
 
 class Validator {
 
-    fun manege(command: String, arguments: List<String>){
+    fun manege(command: String, arguments: List<String>, client: Client){
         if (checkArguments(command, arguments)){
-            manager.continueManage(command, arguments)
+            manager.continueManage(command, arguments, client)
         }
     }
 
@@ -57,6 +58,7 @@ class Validator {
         return true
     }
     fun validateOneArgument(argument : String, type : String) : Any{
+        println(argument)
         return when (type) {
             Var.str -> argument
             Var.long -> {
@@ -146,8 +148,13 @@ class Validator {
         val checker = CheckFiled()
         return if(checker.check(arguments[0])){
             val type = checker.getType(arguments[0])
+            println(arguments)
             arguments[0] + " " + validateOneArgument(arguments[1], type)
-        }else{
+        }else if (arguments.size == 2){
+            validateOneArgument(arguments[0], Var.str).toString() + " " + validateOneArgument(arguments[1], Var.str)
+        }
+
+        else{
             Messages.errorField
         }
     }

@@ -7,6 +7,11 @@ plugins {
 }
 
 dependencies {
+
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("org.postgresql:postgresql:42.5.2")
     implementation("org.apache.commons:commons-text")
     implementation(project(":lib"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")

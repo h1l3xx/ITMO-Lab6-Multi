@@ -7,14 +7,13 @@ import java.net.InetSocketAddress
 import java.net.SocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
-import kotlin.system.exitProcess
 
 class EntryPoint : Channel(DatagramChannel.open()) {
-    var serversList = mutableListOf<ConnectionList>()
-    var clientList = mutableListOf<ConnectionList>()
+    private var serversList = mutableListOf<ConnectionList>()
+    private var clientList = mutableListOf<ConnectionList>()
 
     var EPAddr : SocketAddress
-    val balancer = Balancer()
+    private val balancer = Balancer()
 
     init {
         val address = InetSocketAddress(Config.servAdr, 3000)
@@ -68,6 +67,7 @@ class EntryPoint : Channel(DatagramChannel.open()) {
             }
             if (!checker){
                 clientList.add(ConnectionList(addr))
+                println("New Client is connected with $addr")
             }
         }
     }
@@ -93,22 +93,26 @@ class EntryPoint : Channel(DatagramChannel.open()) {
         }
     }
     private fun clientManager(request: Request, address: SocketAddress){
-        this checkClient address //Добавили клиента в список (если его там не было)
-        if (serversList.isNotEmpty()){
+        if (request.message.message == "ping from client"){
+            this successPing address
+        }else if (serversList.isNotEmpty()){
+            this checkClient address
             sendRequestToServer(request, address)
         }else{
-            sendErrorRequestToClient(Var.errorServer, address)
+            this checkClient address
+            sendErrorRequestToClient(address)
         }
     }
     private fun sendRequestToServer(request: Request, clientAddress : SocketAddress){
         val serverAddress = balancer.balance()
         request.from = clientAddress.toString()
         balancer increment serverAddress
+        
         send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), serverAddress)
 
     }
-    private fun sendErrorRequestToClient(message : String, address : SocketAddress){
-        val answer = Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), message))
+    private fun sendErrorRequestToClient(address : SocketAddress){
+        val answer = Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), Var.errorServer))
         send(ByteBuffer.wrap(serializeRequest(answer).toByteArray()), address)
     }
     private infix fun resendAnswerToClient(request: Request){
@@ -116,5 +120,9 @@ class EntryPoint : Channel(DatagramChannel.open()) {
         val serverAddress = request.getFrom()
         balancer decrement serverAddress
         send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), clientAddress)
+    }
+    private infix fun successPing(addr: SocketAddress){
+        val answer = Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), "success"))
+        send(ByteBuffer.wrap(serializeRequest(answer).toByteArray()), addr)
     }
 }

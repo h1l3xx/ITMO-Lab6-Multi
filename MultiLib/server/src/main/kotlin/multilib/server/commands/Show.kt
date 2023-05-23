@@ -1,15 +1,17 @@
 package multilib.app.commands
 
 
-import multilib.app.collection
+import multilib.server.collection
 import multilib.app.commands.tools.ArgsInfo
 import multilib.app.commands.tools.Result
 import multilib.app.commands.tools.SetMapForCommand
-import multilib.app.uSender
+import multilib.server.uSender
 import multilib.lib.list.MessageDto
 
 
 class Show : Command {
+    override val hidden: Boolean
+        get() = true
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
     override fun comply(variables: HashMap<String, Any>): Result {

@@ -1,7 +1,7 @@
 package multilib.app.commands
 
 import multilib.app.city.arrayFreeId
-import multilib.app.collection
+import multilib.server.collection
 import multilib.app.commands.tools.*
 
 object Str {
@@ -10,6 +10,9 @@ object Str {
 }
 
 class RemoveLower : Command {
+
+    override val hidden: Boolean
+        get() = true
     private val argsInfo = ArgsInfo()
     private val checkField = CheckField()
     private val checkArg = CheckArg()

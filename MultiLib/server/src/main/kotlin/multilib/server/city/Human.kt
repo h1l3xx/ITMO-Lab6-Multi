@@ -20,8 +20,8 @@ class Human {
         this.age = age
     }
 
-    fun getBirthday(): String{
-        return this.birthday.toString()}
+    fun getBirthday(): ZonedDateTime?{
+        return this.birthday}
 
     fun setBirthday(birthday: ZonedDateTime){
         this.birthday = birthday

@@ -1,19 +1,29 @@
-package multilib.app.commands
+package multilib.server.commands
 
 
+import multilib.app.commands.Command
 import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.ParseToSave
 import multilib.app.commands.tools.Result
-import multilib.app.commands.tools.SetMapForCommand
+import multilib.server.collection
+import multilib.server.database.DatabaseManager
 
 
 class Save : Command {
+    override val hidden: Boolean
+        get() = false
     private val argsInfo = ArgsInfo()
-    private val parseToSave = ParseToSave()
-    private val setMapForCommand = SetMapForCommand()
+    private val databaseManager = DatabaseManager()
+
     override fun comply(variables: HashMap<String, Any>): Result {
-        parseToSave.save()
-        return Result("Коллекция сохранена в файл", true)
+        databaseManager.getConnectionToDataBase()
+
+        val cl = collection.getCollection()
+
+        for (city in cl){
+            databaseManager.addOrg(city)
+        }
+
+        return Result("Коллекция сохранена в БД", true)
     }
 
     override fun setMapForClient(): HashMap<String, String> {
