@@ -1,4 +1,4 @@
-package multilib.lib.list
+package multilib.lib.list.dto
 
 import kotlinx.serialization.Serializable
 
@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MessageDto(
     val commandList : List<HashMap<String, String>> = emptyList(),
-    val message : String
+    var message : String
 )

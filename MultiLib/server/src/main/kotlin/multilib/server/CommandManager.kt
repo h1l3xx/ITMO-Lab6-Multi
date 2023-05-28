@@ -1,8 +1,8 @@
 package multilib.app
 
-import multilib.app.commands.Command
-import multilib.app.commands.tools.Values
-import multilib.lib.list.MessageDto
+import multilib.server.commands.Command
+import multilib.server.commands.tools.Values
+import multilib.lib.list.dto.MessageDto
 import multilib.server.uSender
 
 
@@ -19,8 +19,8 @@ class CommandManager {
         if (checkArgumentsInfo(name, arguments)){
             val variables = commandList[name]!!.argContract(arguments)
             val result = commandList[name]!!.comply(variables)
-            if (result.getBool()){
-                uSender.print (MessageDto(emptyList(), result.getMessage() ))
+            if (result.bool){
+                uSender.print (MessageDto(emptyList(), result.message), result.getCommit())
             }
         }
     }
@@ -44,13 +44,13 @@ class CommandManager {
         val info = commandList[name]!!.argsInfo()
         val size = arguments.size
         if (size > info[Values.max]!! || size < info[Values.min]!!){
-            uSender.print (MessageDto(emptyList(), Messages.MESSAGE ))
+            uSender.print (MessageDto(emptyList(), Messages.MESSAGE), emptyList())
             return false}
         else if (size < info[Values.max]!! && size > info[Values.min]!! && info[Values.between] == 0) {
-            uSender.print (MessageDto(emptyList(),  Messages.MESSAGE ))
+            uSender.print (MessageDto(emptyList(),  Messages.MESSAGE), emptyList())
             return false
         }else if ((info[Values.max] == info[Values.min]) && info[Values.max] != size){
-            uSender.print (MessageDto(emptyList(), Messages.MESSAGE ))
+            uSender.print (MessageDto(emptyList(), Messages.MESSAGE), emptyList())
             return false
         }
         return true

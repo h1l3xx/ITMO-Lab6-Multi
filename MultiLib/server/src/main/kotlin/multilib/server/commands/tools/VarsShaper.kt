@@ -1,4 +1,4 @@
-package multilib.app.commands.tools
+package multilib.server.commands.tools
 
 
 
@@ -6,14 +6,13 @@ package multilib.app.commands.tools
 
 
 
-import multilib.app.city.Climate
-import multilib.app.city.Government
-import multilib.app.commands.Var
+import multilib.server.city.Climate
+import multilib.server.city.Government
+import multilib.server.commands.Var
 import multilib.app.sc
 import multilib.server.uSender
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 
@@ -37,9 +36,11 @@ object Messages{
 
 }
 class VarsShaper {
-    val listForAddCommand = listOf(Messages.setName, Messages.setCoordX, Messages.setCoordY, Messages.setArea,
+    val listForAddCommand = listOf(
+        Messages.setName, Messages.setCoordX, Messages.setCoordY, Messages.setArea,
         Messages.setPopulation, Messages.setMeters, Messages.setAgl, Messages.setClimate, Messages.setGovernment,
-        Messages.setAge, Messages.setBirthday)
+        Messages.setAge, Messages.setBirthday
+    )
 
     fun shape(arguments : List<String>):HashMap<String, Any>{
         val variables = HashMap<String, Any>()
@@ -59,7 +60,7 @@ class VarsShaper {
         return variables
     }
     fun setName():String{
-        uSender.print ( Messages.setName )
+        uSender.print (Messages.setName)
         val name = sc.nextLine()
         return if (checkName(name)) {
             return name
@@ -68,43 +69,22 @@ class VarsShaper {
         }
     }
 
-    fun checkName(name : String) : Boolean{
+    fun checkName(name : String) : Boolean {
         return if (name == "" || name.equals(null) || name == "null") {
-            uSender.print ( Messages.errorName )
+            uSender.print(Messages.errorName)
             this.setName()
             false
         } else {
             true
         }
     }
-
-    fun setCoordY(): Float {
-        uSender.print ( Messages.setCoordY )
-        val y = sc.nextLine()
-        return if (checkCoordY(y)) {
-            return y.toFloat()
-        } else {
-            this.setCoordY()
-        }
-    }
-
     fun checkCoordY(y : String) : Boolean{
         return try {
             y.toFloat()
             true
         } catch (e: Exception){
-            uSender.print ( Messages.errorCoords )
+            uSender.print (Messages.errorCoords)
             false
-        }
-    }
-
-    fun setCoordX():Long {
-        uSender.print ( Messages.setCoordX )
-        val x = sc.nextLine()
-        return if (checkCoordX(x)) {
-            x.toLong()
-        } else {
-            this.setCoordX()
         }
     }
 
@@ -113,39 +93,27 @@ class VarsShaper {
             x.toLong()
             true
         } catch (e: Exception) {
-            uSender.print ( Messages.errorCoords )
+            uSender.print (Messages.errorCoords)
             false
-        }
-    }
-    fun setAreaAndAge(filed : String): Int{
-        if (filed == Var.area){
-            uSender.print ( Messages.setArea )
-        } else{
-            uSender.print ( Messages.setAge )
-        }
-        val area = sc.nextLine()
-        return if (checkAreaAndAge(area)) {
-            area.toInt()
-        } else {
-            this.setAreaAndAge(filed)
         }
     }
     fun checkAreaAndAge(area : String): Boolean{
         return try {
             area.toInt()
             if (area.toInt() < 0){
-                uSender.print (Messages.errorValue )
+                uSender.print (Messages.errorValue)
                 false}
             else{
-                true}
+                true
+            }
         }catch (e : Exception){
-            uSender.print ( Messages.errorValue )
+            uSender.print (Messages.errorValue)
             false
         }
     }
 
-    fun setPopulation():Long{
-        uSender.print ( Messages.setPopulation )
+    private fun setPopulation():Long{
+        uSender.print (Messages.setPopulation)
         val population = sc.nextLine()
         return if (checkPopulation(population)) {
             return population.toLong()
@@ -158,25 +126,14 @@ class VarsShaper {
         return try {
             population.toLong()
             if (population.toLong() < 0) {
-                uSender.print ( Messages.errorValue )
+                uSender.print (Messages.errorValue)
                 this.setPopulation()
             }
             true
         } catch (e: Exception) {
-            uSender.print ( Messages.errorValue )
+            uSender.print (Messages.errorValue)
             false
         }
-    }
-
-    fun setMeters() : Long{
-        uSender.print ( Messages.setMeters )
-        val meters = sc.nextLine()
-        return if (checkMeters(meters)) {
-            return meters.toLong()
-        } else {
-            this.setMeters()
-        }
-
     }
 
     fun checkMeters(meters: String) : Boolean{
@@ -184,36 +141,18 @@ class VarsShaper {
             meters.toLong()
             true
         } catch (e: Exception) {
-            uSender.print ( Messages.errorValue )
+            uSender.print (Messages.errorValue)
             false
         }
     }
-    fun setAgl() : Double{
-        uSender.print ( Messages.setAgl )
-        val agl = sc.nextLine()
-        return if (checkAdl(agl)) {
-            return agl.toDouble()
-        } else {
-            this.setAgl()
-        }
-    }
 
-    fun checkAdl(agl : String) : Boolean{
+    fun checkAdl(agl : String) : Boolean {
         return try {
             agl.toDouble()
             true
         } catch (e: Exception) {
-            uSender.print ( Messages.errorValue )
+            uSender.print(Messages.errorValue)
             false
-        }
-    }
-    fun setClimate(): String{
-        uSender.print ( Messages.setClimate )
-        val climate  = sc.nextLine()
-        return if (checkClimate(climate)) {
-            return climate.uppercase()
-        } else {
-            this.setClimate()
         }
     }
 
@@ -222,17 +161,8 @@ class VarsShaper {
             Climate.valueOf(climate.uppercase())
             true
         } catch (e: Exception) {
-            uSender.print ( Messages.errorValue )
+            uSender.print (Messages.errorValue)
             false
-        }
-    }
-    fun setGovernment(): String{
-        uSender.print ( Messages.setGovernment )
-        val government = sc.nextLine()
-        return if (checkGovernment(government)) {
-            return government.uppercase()
-        } else {
-            setGovernment()
         }
     }
 
@@ -241,27 +171,18 @@ class VarsShaper {
             Government.valueOf(government.uppercase())
             true
         } catch (e: Exception) {
-            uSender.print ( Messages.errorValue )
+            uSender.print (Messages.errorValue)
             false
-        }
-    }
-    fun setBirthday(): String{
-        uSender.print ( Messages.setBirthday )
-        val birthday = sc.nextLine()
-        return if (checkBirthday(birthday)) {
-            return birthday
-        } else {
-            this.setBirthday()
         }
     }
     fun checkBirthday(birthday : String) : Boolean{
         return try {
             val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
             val date: LocalDate = LocalDate.parse(birthday, formatter)
-            val result: ZonedDateTime = date.atStartOfDay(ZoneId.systemDefault())
+            date.atStartOfDay(ZoneId.systemDefault())
             true
         } catch (e: Exception) {
-            uSender.print ( Messages.errorValue )
+            uSender.print (Messages.errorValue)
             false
         }
     }

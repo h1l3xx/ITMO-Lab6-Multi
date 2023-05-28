@@ -12,7 +12,6 @@ import multilib.client.commands.fieldMap
 import multilib.client.manager
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 object Messages {
@@ -136,7 +135,7 @@ class Validator {
         return try {
             val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
             val date: LocalDate = LocalDate.parse(birthday, formatter)
-            val result: ZonedDateTime = date.atStartOfDay(ZoneId.systemDefault())
+            date.atStartOfDay(ZoneId.systemDefault())
             true
         } catch (e: Exception) {
             false
@@ -252,13 +251,13 @@ class Validator {
         val messages = commandList[Var.add]!![Var.description]!!.split("; ").drop(1)
         val fields = fieldMap.keys.toString().split(", ")
         var arguments = ""
-        for (i in 0..fieldMap.keys.size-1){
-            var field = ""
+        for (i in 0 until fieldMap.keys.size){
+            var field : String
             val afterRegex = regex.find(messages[i])
             if (afterRegex != null){
                 field = afterRegex.value
-                for (f in 0 until fields.size){
-                    var compareField = fields[f]
+                for (element in fields){
+                    var compareField = element
                     if (compareField.contains("[")){
                         compareField = compareField.slice(1 until compareField.length)
                     }
@@ -267,7 +266,7 @@ class Validator {
                     }
                     if ("($compareField)" == field){
                         var returnValue = ""
-                        while (returnValue.equals("")){
+                        while (returnValue == ""){
                             manager.uPrinter.print { messages[i] }
                             val arg = scanner.readLine()
                             returnValue = validateOneArgument(arg!!, fieldMap[compareField].toString()).toString()

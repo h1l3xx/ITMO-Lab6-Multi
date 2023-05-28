@@ -1,15 +1,15 @@
 package multilib.server.server
 
 
-import multilib.app.commands.Load
+import multilib.server.commands.Load
 import multilib.app.commands.tools.Validator
 import multilib.server.operator
 import multilib.app.senders.ChannelAndAddressManager
 import multilib.server.uSender
 import multilib.lib.list.*
 import multilib.lib.list.printers.UPrinter
-import multilib.list.Config
-import multilib.server.collection
+import multilib.lib.list.Config
+import multilib.lib.list.dto.MessageDto
 
 import java.net.InetSocketAddress
 import java.net.PortUnreachableException
@@ -21,6 +21,7 @@ class UpdServer : Channel(DatagramChannel.open()) {
 
     private var running = true
     private val uPrinter = UPrinter()
+    private var serverToken = ""
 
     private val entryPointAddress : SocketAddress = InetSocketAddress(Config.servAdr, Config.port)
 
@@ -28,7 +29,7 @@ class UpdServer : Channel(DatagramChannel.open()) {
 
         this.channel.bind(null)
         this.channel.connect(entryPointAddress)
-        val request = Request(this.channel.localAddress, entryPointAddress, 1, MessageDto(emptyList(), "try to connect"))
+        val request = Request(serverToken, this.channel.localAddress, entryPointAddress, 1, MessageDto(emptyList(), "try to connect"))
         this.channel.send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), entryPointAddress)
         uPrinter.print { "Server is trying to connect to Entry Point." }
 
@@ -55,21 +56,28 @@ class UpdServer : Channel(DatagramChannel.open()) {
     }
 
     private fun receive(data : String){
-        val deserializationRequest = deserializeRequest(data)
-        val address = deserializationRequest.getFrom()
+        val req = deserializeRequest(data)
+        val address = req.getFrom()
 
-        uSender.setClient(address)
+        uSender setClient address
+        uSender setClientToken req.token
 
-        val commandAndArguments = deserializationRequest.message
+        val message = req.message.message
 
-        if (checkForCommandList(commandAndArguments.message)){
-            val map = Validator().takeAllInfoFromCommand()
-
-            uSender.print(MessageDto(map, "It's all commands"))
+        if (req.token == "" && message != "commandList" && !message.contains("auth") && !message.contains("sign_up")){
+            uSender.print("Вы не авторизованы")
         }else{
+            val commandAndArguments = req.message
 
-            println(deserializationRequest.message.message)
-        operator.runCommand(deserializationRequest.message.message)
+            if (checkForCommandList(commandAndArguments.message)){
+                val map = Validator().takeAllInfoFromCommand()
+
+                uSender.print(MessageDto(map, "It's all commands"), emptyList())
+            }else{
+
+                println(req.message.message)
+                operator.runCommand(req.message.message)
+            }
         }
     }
 
@@ -83,7 +91,7 @@ class UpdServer : Channel(DatagramChannel.open()) {
     private fun setChannelAndSocket(socketAddress: SocketAddress, channel: DatagramChannel){
         val manager = ChannelAndAddressManager(channel, socketAddress)
 
-        uSender.newManager(manager)
+        uSender newManager manager
     }
     private fun checkForCommandList(command : String) : Boolean{
         return command.contains("commandList")

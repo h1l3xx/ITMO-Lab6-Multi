@@ -1,18 +1,22 @@
-package multilib.app.commands
+package multilib.server.commands
 
 
 import multilib.server.commandManager
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.Result
-import multilib.app.commands.tools.SetMapForCommand
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.Result
+import multilib.server.commands.tools.SetMapForCommand
 import multilib.server.uSender
-import multilib.lib.list.MessageDto
+import multilib.lib.list.dto.MessageDto
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
 
 
-class Help : Command{
+class Help : Command {
 
     override val hidden: Boolean
         get() = true
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
 
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
@@ -23,7 +27,7 @@ class Help : Command{
         for (command in commandDescriptionList) {
             returnValue += "${command.key}  ---  ${command.value}\n"
         }
-        uSender.print(MessageDto(emptyList(), returnValue))
+        uSender.print(MessageDto(emptyList(), returnValue), emptyList())
         return Result("Команда успешно выполнена", false)
     }
 
@@ -44,6 +48,6 @@ class Help : Command{
     }
 
     override fun setMapForClient(): HashMap<String, String> {
-        return setMapForCommand.setMapForCommand(0,0,true,Help(), "")
+        return setMapForCommand.setMapForCommand(0,0,true, Help(), "")
     }
 }

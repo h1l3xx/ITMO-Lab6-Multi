@@ -1,8 +1,11 @@
-package multilib.app.commands
+package multilib.server.commands
 
-import multilib.app.commands.tools.Result
+import multilib.server.commands.tools.Result
+import multilib.lib.list.dto.SyncDto
 
 interface Command {
+
+    val sync : SyncDto
 
     val hidden : Boolean
     fun comply(variables: HashMap<String, Any>): Result

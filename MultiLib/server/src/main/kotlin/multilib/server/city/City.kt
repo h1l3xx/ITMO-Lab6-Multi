@@ -1,9 +1,9 @@
-package multilib.app.city
+package multilib.server.city
 import java.time.LocalDateTime
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class City {
+    private var owner: Pair<Int, String>? = null
     private var id: Long? =null
     private var name: String? =null
     private var coordinates: Coordinates? = Coordinates()
@@ -21,6 +21,7 @@ class City {
         val formatted = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         val str = StringBuilder()
         str.append("id города: ").append(id)
+        str.append("; Создатель: ").append(owner!!.second)
         str.append("; Название города: ").append(name)
         str.append("; Координаты города: ").append(coordinates.toString())
         str.append("; Дата создания: ").append(creationDate!!.format(formatted))
@@ -33,19 +34,11 @@ class City {
         str.append("; Губернатор: ").append(governor.toString()).append("\n")
         return str.toString()
     }
-    fun getCoordinates() : Coordinates{
+    fun getCoordinates() : Coordinates {
         return this.coordinates!!
     }
     fun setCoordinates(coordinates: Coordinates) {
         this.coordinates = coordinates
-    }
-
-    fun setCoordinatesX(x: Long) {
-        coordinates!!.setX(x)
-    }
-
-    fun setCoordinatesY(y: Float) {
-        coordinates!!.setY(y)
     }
 
     fun getMetersAboveSeaLevel(): Long? = metersAboveSeaLevel
@@ -55,20 +48,23 @@ class City {
     fun setGovernor(governor: Human?){
         this.governor = governor
     }
-    fun getGovernor() : Human{
+    fun getGovernor() : Human {
         return this.governor!!
-    }
-    fun setGovernorAge(birthday: ZonedDateTime){
-        governor!!.setBirthday(birthday)
     }
 
     fun getName(): String? = name
     fun setName(name: String) {
         this.name = name
     }
+    fun setOwner(owner : Pair<Int, String>){
+        this.owner = owner
+    }
+    fun getOwner() : Pair<Int, String>{
+        return owner!!
+    }
 
-    fun getId(): Long? = id
-    fun setId(id: Long?) {
+    fun getId(): kotlin.Long? = id
+    fun setId(id: kotlin.Long?) {
         this.id = id
     }
 
@@ -84,7 +80,7 @@ class City {
     fun setGovernment(government: Government){
         this.government = government
     }
-    fun getGovernment(): Government{
+    fun getGovernment(): Government {
         return this.government!!
     }
 

@@ -1,22 +1,37 @@
-package multilib.app.commands
+package multilib.server.commands
 
-import multilib.app.commands.tools.Result
+import multilib.server.commands.tools.Result
 import multilib.server.collection
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.SetMapForCommand
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.SetMapForCommand
+import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
+import multilib.server.jwt.Builder
+import multilib.server.uSender
+import java.time.ZonedDateTime
 
 class Clear : Command {
     override val hidden: Boolean
         get() = true
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
 
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
     override fun comply(variables: HashMap<String, Any>): Result {
-
+        val list = mutableListOf<CommitDto>()
         val cityCollection = collection.getCollection()
-        cityCollection.clear()
-
-        return Result("Коллекция очищена.", true)
+        val iterator = cityCollection.iterator()
+        while (iterator.hasNext()) {
+            val iterCity = iterator.next()
+            val token = Builder().verify(uSender.getToken()).data["login"]!!
+            if (iterCity.getOwner().second == token) {
+                list.add(CommitDto(iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
+                iterator.remove()
+            }
+        }
+        return Result("Коллекция очищена.", true, list)
     }
 
     override fun getName(): String {

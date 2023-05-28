@@ -1,10 +1,11 @@
-package multilib.app.commands.tools
+package multilib.server.commands.tools
 
-class Result(private val message: String, private val bool: Boolean) {
-    fun getBool(): Boolean {
-        return this.bool
-    }
-    fun getMessage(): String{
-        return this.message
+import multilib.lib.list.dto.CommitDto
+
+class Result(var message: String, val bool: Boolean, private val list: List<CommitDto>) {
+    constructor(message: String, bool: Boolean) :
+            this(message, bool, emptyList())
+    fun getCommit() : List<CommitDto>{
+        return this.list
     }
 }

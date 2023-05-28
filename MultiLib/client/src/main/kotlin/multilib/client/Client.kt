@@ -3,7 +3,10 @@ package multilib.client
 import multilib.client.commands.Var
 import multilib.client.handkers.Connect
 import multilib.lib.list.*
-import multilib.list.Config
+import multilib.lib.list.Config
+import multilib.lib.list.dto.MessageDto
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
 import java.net.InetSocketAddress
 import java.net.PortUnreachableException
 import java.net.SocketAddress
@@ -15,6 +18,9 @@ import kotlin.system.exitProcess
 var connectToEP = false
 
 class Client : Channel(DatagramChannel.open()){
+
+    private var token = ""
+
     private val entryPointAddress : SocketAddress = InetSocketAddress(Config.servAdr, Config.port)
     private val connect = Connect()
     init {
@@ -36,11 +42,15 @@ class Client : Channel(DatagramChannel.open()){
                  data = (String(bytes))
              }
             connectToEP = true
-             return deserializeRequest(data)
+            val req = deserializeRequest(data)
+            if (req.message.message == "Вы авторизованы"){
+                this.token = req.token
+            }
+            return req
         }catch (e : PortUnreachableException){
             connectToEP = false
             connect.tryAgain()
-            return Request(channel.localAddress, channel.localAddress, 0, MessageDto(emptyList(), Var.errorEP))
+            return Request(this.token, channel.localAddress, channel.localAddress, 0, MessageDto(emptyList(), Var.errorEP))
         }
     }
     fun stop(line : String){
@@ -48,8 +58,13 @@ class Client : Channel(DatagramChannel.open()){
         println("Происходит отключение...")
         exitProcess(21)
     }
-    infix fun sendMessage(mess: String) {
-        val request = Request(channel.localAddress, entryPointAddress, 0, MessageDto(emptyList(), mess))
+    fun sendMessage(mess: String, type: String?) {
+        val request = Request(this.token, channel.localAddress, entryPointAddress, 0, MessageDto(emptyList(),mess), emptyList(), null)
+        if (type == Types.SYNC.toString()){
+            request.type = SyncDto(Types.SYNC)
+        }else if (type == Types.NO_SYNC.toString()){
+            request.type = SyncDto(Types.NO_SYNC)
+        }
         send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), entryPointAddress)
     }
 }

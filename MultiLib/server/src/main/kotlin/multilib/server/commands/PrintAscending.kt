@@ -1,10 +1,16 @@
-package multilib.app.commands
+package multilib.server.commands
 
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.SetMapForCommand
-import multilib.app.commands.tools.Result
+import multilib.app.commands.Show
+import multilib.app.commands.Sort
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.SetMapForCommand
+import multilib.server.commands.tools.Result
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
 
 class PrintAscending : Command {
+    override val sync: SyncDto
+        get() = SyncDto(Types.SYNC)
 
     override val hidden: Boolean
         get() = true

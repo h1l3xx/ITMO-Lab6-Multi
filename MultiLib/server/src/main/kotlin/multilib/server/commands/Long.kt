@@ -1,16 +1,15 @@
 package multilib.server.commands
 
-import multilib.app.commands.Command
-import multilib.app.commands.Info
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.Result
-import multilib.app.commands.tools.SetMapForCommand
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.Result
+import multilib.server.commands.tools.SetMapForCommand
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
 import multilib.lib.list.printers.UPrinter
-import java.util.Timer
-
-import kotlin.concurrent.schedule
 
 class Long : Command {
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
     override val hidden: Boolean
         get() = false
     private val argsInfo = ArgsInfo()

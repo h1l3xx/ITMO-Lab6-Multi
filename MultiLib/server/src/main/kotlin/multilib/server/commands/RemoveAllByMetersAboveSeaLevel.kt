@@ -1,36 +1,40 @@
-package multilib.app.commands
+package multilib.server.commands
 
-import multilib.app.city.arrayFreeId
 import multilib.server.collection
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.Result
-import multilib.app.commands.tools.SetMapForCommand
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.Result
+import multilib.server.commands.tools.SetMapForCommand
+import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
+import multilib.server.jwt.Builder
+import multilib.server.uSender
+import java.time.ZonedDateTime
 
 
 class RemoveAllByMetersAboveSeaLevel: Command {
 
     override val hidden: Boolean
         get() = true
-
+    val commits = mutableListOf<CommitDto>()
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
     override fun comply(variables: HashMap<String, Any>): Result {
 
 
         val iterator = collection.getCollection().iterator()
+        val token = Builder().verify(uSender.getToken()).data["login"]!!
         while (iterator.hasNext()) {
             val iterCity = iterator.next()
-            if (iterCity.getMetersAboveSeaLevel() == variables[Var.meters]) {
-                arrayFreeId = if (arrayFreeId.isNotEmpty()){
-                    arrayFreeId.clone() + iterCity.getId()!!
-                } else{
-                    arrayOf(iterCity.getId()!!)
-                }
+            if (iterCity.getMetersAboveSeaLevel() == variables[Var.meters] && token == iterCity.getOwner().second) {
+                commits.add(CommitDto(iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
                 iterator.remove()
             }
         }
 
-        return Result("Удалены все города, с указанным значением.", true)
+        return Result("Удалены все города, с указанным значением.", true, commits)
     }
 
     override fun getName(): String {

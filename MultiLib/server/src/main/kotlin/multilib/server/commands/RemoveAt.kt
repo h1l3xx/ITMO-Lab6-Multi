@@ -1,16 +1,20 @@
-package multilib.app.commands
+package multilib.server.commands
 
 
-import multilib.app.city.arrayFreeId
 import multilib.server.collection
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.CheckArg
-import multilib.app.commands.tools.Result
-import multilib.app.commands.tools.SetMapForCommand
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.CheckArg
+import multilib.server.commands.tools.Result
+import multilib.server.commands.tools.SetMapForCommand
+import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
+import java.time.ZonedDateTime
 
 
 class RemoveAt : Command {
-
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
     override val hidden: Boolean
         get() = true
     private val argsInfo = ArgsInfo()
@@ -18,7 +22,7 @@ class RemoveAt : Command {
     private val setMapForCommand = SetMapForCommand()
     override fun comply(variables: HashMap<String, Any>): Result {
         val message : String
-
+        val list = mutableListOf<CommitDto>()
         val argument = variables[Var.index].toString().toInt()
 
         val cl = collection.getCollection()
@@ -26,17 +30,13 @@ class RemoveAt : Command {
         message = if (cl.size-1 < argument){
             "В коллекции нет города под таким индексом."
         }else{
-            arrayFreeId = if (arrayFreeId.isNotEmpty()){
-                arrayFreeId.clone() + cl[0].getId()!!
-            } else{
-                arrayOf(cl[0].getId()!!)
-            }
+            list.add(CommitDto(cl[argument].getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
             cl.removeAt(argument)
             "Город с указанным индексом удален."
         }
 
 
-        return Result(message, true)
+        return Result(message, true, list)
     }
 
     override fun getName(): String {
@@ -58,6 +58,6 @@ class RemoveAt : Command {
     }
 
     override fun setMapForClient(): HashMap<String, String> {
-        return setMapForCommand.setMapForCommand(1,1,true,RemoveAt(), Var.integer)
+        return setMapForCommand.setMapForCommand(1,1,true, RemoveAt(), Var.integer)
     }
 }

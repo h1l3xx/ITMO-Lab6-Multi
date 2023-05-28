@@ -1,16 +1,12 @@
 package multilib.app
 
 
-import multilib.app.commands.ExecuteScript
-import multilib.lib.list.MessageDto
+import multilib.server.commands.ExecuteScript
+import multilib.lib.list.dto.MessageDto
 import multilib.server.commandManager
 import multilib.server.uSender
 import java.util.*
 
-object Strings {
-    const val START_STRING = "Введите абсолютный путь до файла:"
-    const val NO_COMMAND = "Такой команды не существует. Узнать о поддерживаемых командах можно через команду help."
-}
 
 var sc = Scanner(System.`in`)
 class Operator {
@@ -41,7 +37,7 @@ class Operator {
                     commandManager.manage(name, arguments)
                 }
             } else {
-                uSender.print(MessageDto(emptyList(), Messages.MESSAGE))
+                uSender.print(MessageDto(emptyList(), Messages.MESSAGE), emptyList())
             }
         }
     }

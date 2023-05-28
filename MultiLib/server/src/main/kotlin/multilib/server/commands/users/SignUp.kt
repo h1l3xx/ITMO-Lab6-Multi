@@ -1,19 +1,22 @@
 package multilib.server.commands.users
 
-import multilib.app.commands.Command
-import multilib.app.commands.Var
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.Result
-import multilib.app.commands.tools.SetMapForCommand
+import multilib.server.commands.Command
+import multilib.server.commands.Var
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.Result
+import multilib.server.commands.tools.SetMapForCommand
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
 import multilib.server.database.DatabaseManager
 
-class SingUp : Command {
+class SignUp : Command {
     private val argsInfo = ArgsInfo()
     private val databaseManager = DatabaseManager()
     private val setMapForCommand = SetMapForCommand()
-
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
     override fun setMapForClient(): HashMap<String, String> {
-        return setMapForCommand.setMapForCommand(2,2,false, SingUp(), Var.str + "; " + Var.str)
+        return setMapForCommand.setMapForCommand(2,2,false, SignUp(), Var.str + "; " + Var.str)
     }
 
     override fun comply(variables: HashMap<String, Any>): Result {
@@ -40,7 +43,7 @@ class SingUp : Command {
         get() = false
 
     override fun getName(): String {
-        return "sing_up"
+        return "sign_up"
     }
 
     override fun getDescription(): String {

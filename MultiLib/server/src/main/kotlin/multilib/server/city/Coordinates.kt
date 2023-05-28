@@ -1,4 +1,4 @@
-package multilib.app.city
+package multilib.server.city
 
 class Coordinates {
     private var x: Long? = null

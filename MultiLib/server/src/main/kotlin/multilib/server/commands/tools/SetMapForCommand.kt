@@ -1,8 +1,9 @@
-package multilib.app.commands.tools
+package multilib.server.commands.tools
 
 
-import multilib.app.commands.Add
-import multilib.app.commands.Command
+import multilib.server.commands.Add
+import multilib.server.commands.Command
+import multilib.app.commands.tools.Validator
 
 class SetMapForCommand {
     fun setMapForCommand(min : Int, max : Int, inline : Boolean, command : Command, description: String) : HashMap<String, String>{
@@ -12,6 +13,7 @@ class SetMapForCommand {
         commandInfo.setMax(max)
         commandInfo.setMin(min)
         commandInfo.setHidden(command.hidden)
+        commandInfo.setDto(command.sync)
         if (command.getName() == Add().getName()){
             commandInfo.setText(BuilderTextForAddCommand().build(VarsShaper().listForAddCommand))
         }else{

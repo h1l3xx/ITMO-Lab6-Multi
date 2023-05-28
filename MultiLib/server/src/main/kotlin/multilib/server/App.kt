@@ -5,13 +5,14 @@ package multilib.server
 
 import multilib.app.CommandManager
 import multilib.app.Operator
-import multilib.app.city.CityCollection
-import multilib.app.senders.USender
+import multilib.server.city.CityCollection
 import multilib.app.commands.*
-import multilib.server.server.UpdServer
+import multilib.app.senders.USender
+import multilib.server.commands.*
 import multilib.server.commands.Long
 import multilib.server.commands.users.Authorization
-import multilib.server.commands.users.SingUp
+import multilib.server.commands.users.SignUp
+import multilib.server.server.UpdServer
 
 
 val collection = CityCollection()
@@ -21,9 +22,11 @@ val uSender = USender()
 
 
 fun main(){
-    commandManager.register(Add(), Clear(), ExecuteScript(), Exit(), FilterContainsName(), Help(), Info(),
+    commandManager.register(
+        Add(), Clear(), ExecuteScript(), Exit(), FilterContainsName(), Help(), Info(),
         PrintAscending(), RemoveAllByMetersAboveSeaLevel(), RemoveAt(), RemoveById(), RemoveLower(), Show(), Sort(), UpdateById(), Long(),
-        Authorization(), SingUp()
+        Authorization(), SignUp()
     )
     UpdServer().run()
 }
+

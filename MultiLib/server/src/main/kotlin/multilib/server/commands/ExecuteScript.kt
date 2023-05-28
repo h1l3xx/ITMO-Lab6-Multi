@@ -1,21 +1,24 @@
-package multilib.app.commands
+package multilib.server.commands
 
 
-import multilib.app.commands.tools.ArgsInfo
+import multilib.server.commands.tools.ArgsInfo
 
-import multilib.app.commands.tools.Result
-import multilib.app.commands.tools.SetMapForCommand
-import multilib.app.commands.tools.VarsShaper
+import multilib.server.commands.tools.Result
+import multilib.server.commands.tools.SetMapForCommand
 import multilib.server.operator
 import multilib.server.uSender
-import multilib.lib.list.MessageDto
+import multilib.lib.list.dto.MessageDto
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
 
 import java.util.*
 
 var stack = false
-class ExecuteScript: Command{
+class ExecuteScript: Command {
     override val hidden: Boolean
         get() = true
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
 
     private val setMapForCommand = SetMapForCommand()
     private val argsInfo = ArgsInfo()
@@ -36,7 +39,7 @@ class ExecuteScript: Command{
                 }
             }
         }catch (e : Exception){
-            uSender.print(MessageDto(emptyList(), "Ошибка. Проверьте корректность данных в скрипте."))
+            uSender.print(MessageDto(emptyList(), "Ошибка. Проверьте корректность данных в скрипте."), emptyList())
         }
 
         stack = false

@@ -1,4 +1,4 @@
-package multilib.app.commands.tools
+package multilib.server.commands.tools
 
 object Values {
     const val max = "max"

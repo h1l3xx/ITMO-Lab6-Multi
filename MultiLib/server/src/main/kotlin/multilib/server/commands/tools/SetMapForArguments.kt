@@ -1,8 +1,8 @@
-package multilib.app.commands.tools
+package multilib.server.commands.tools
 
 
 
-import multilib.app.commands.Var
+import multilib.server.commands.Var
 
 class SetMapForArguments {
     fun set() : Map<String, String>{

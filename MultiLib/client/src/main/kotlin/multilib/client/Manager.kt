@@ -10,6 +10,7 @@ import multilib.client.handkers.Scanner
 import multilib.client.handkers.Messages
 import multilib.client.handkers.Validator
 import multilib.lib.list.Request
+import multilib.lib.list.dto.Types
 import multilib.lib.list.printers.UPrinter
 import kotlin.concurrent.thread
 
@@ -28,7 +29,7 @@ class Manager {
 
 
 
-        client sendMessage "commandList"
+        client.sendMessage("commandList", Types.NO_SYNC.toString())
 
 
         val map = client.getMessage()
@@ -74,9 +75,7 @@ class Manager {
     fun continueManage(command : String, arguments : List<String>, client : Client){
         if (arguments.isEmpty() && !commandList[command]!![Var.description]!!.contains(Var.allFields)){
 
-            println(command)
-            println(arguments)
-            client sendMessage command
+            client.sendMessage(command, commandList[command]!![Var.type])
             uPrinter.print { getMessage(client)}
         }else{
             if (validateArguments(command, arguments, client)){
@@ -86,13 +85,13 @@ class Manager {
     }
     private fun validateArguments(c: String, a : List<String>, client : Client): Boolean{
         val description = commandList[c]!![Var.description]!!
-        if (description != "" && !description.contains("field") && !description.contains(Var.wayToFile) && c!="auth"&&c!="sing_up"){
+        if (description != "" && !description.contains("field") && !description.contains(Var.wayToFile) && c!="auth"&&c!="sign_up"){
             val returnValue = validator.validateOneArgument(a[0], description).toString()
             return if (this badValue returnValue){
                 uPrinter.print { returnValue }
                 false
             }else{
-                client sendMessage "$c $returnValue"
+                client.sendMessage("$c $returnValue", commandList[c]!![Var.type])
                 true
             }
         }else if (!description.contains(Var.allFields)  && !description.contains(Var.wayToFile)){
@@ -102,7 +101,7 @@ class Manager {
                 uPrinter.print { returnValue }
                 false
             }else{
-                client sendMessage "$c $returnValue"
+                client.sendMessage("$c $returnValue", commandList[c]!![Var.type])
                 true
             }
         }else if (description.contains(Var.allFields)  && !description.contains(Var.wayToFile)){
@@ -111,12 +110,12 @@ class Manager {
                 uPrinter.print { answer }
                 false
             }else{
-                client sendMessage "$c $answer"
+                client.sendMessage("$c $answer", commandList[c]!![Var.type])
                 true
             }
         }else{
             if ((validator workWithFile a).isNotEmpty()){
-                client sendMessage (validator workWithFile a).toString()
+                client.sendMessage((validator workWithFile a).toString(), commandList[c]!![Var.type])
             }
             return true
         }
@@ -144,7 +143,7 @@ class Manager {
             var run = connectToEP
             while (run) {
                 Thread.sleep(8_000)
-                client sendMessage "ping from client"
+                client.sendMessage("ping from client", Types.NO_SYNC.toString())
                 val answer = client.getMessage().message.message
                 if (answer != "success"){
                     client.stop("Sorry, EP is dead")

@@ -3,6 +3,7 @@ package multilib.client.commands
 import multilib.client.manager
 
 object Var{
+    const val type = "type"
     const val errorServer = "Нет ни одного рабочего сервера. Повторная попытка запроса через 10 секунд."
     const val errorEP = "Отсутвует подключение к Entry Point. Повторная попытка запроса через 10 секунд."
     const val choose = "choose"
@@ -43,11 +44,12 @@ class CommandList {
             preMap[Var.between] = list[i][Var.between].toString()
             preMap[Var.description] = list[i][Var.description].toString()
             preMap[Var.hidden] = list[i][Var.hidden].toString()
+            preMap[Var.type] = list[i][Var.type].toString()
 
             commandList[list[i][Var.name].toString()] = preMap
         }
         setFieldMap(list[list.lastIndex])
-
+        println(commandList)
         return commandList
     }
 

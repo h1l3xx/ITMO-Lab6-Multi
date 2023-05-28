@@ -1,10 +1,10 @@
-package multilib.app.commands.tools
+package multilib.server.commands.tools
 
 
 
 
-import multilib.app.city.City
-import multilib.app.commands.Var
+import multilib.server.city.City
+import multilib.server.commands.Var
 import multilib.app.sc
 import multilib.server.uSender
 

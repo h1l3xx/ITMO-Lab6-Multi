@@ -1,18 +1,24 @@
 package multilib.server.commands.users
 
-import multilib.app.commands.Command
-import multilib.app.commands.Var
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.CheckArg
-import multilib.app.commands.tools.Result
-import multilib.app.commands.tools.SetMapForCommand
+import multilib.server.commands.Command
+import multilib.server.commands.Var
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.Result
+import multilib.server.commands.tools.SetMapForCommand
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
+import multilib.server.commands.tools.AuthManager
 import multilib.server.database.DatabaseManager
+import multilib.server.uSender
 
-class Authorization : Command{
+class Authorization : Command {
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
 
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
     private val databaseManager = DatabaseManager()
+    private val authManager = AuthManager()
 
     override fun comply(variables: HashMap<String, Any>): Result {
         var returnLine = "Неправильно введен login или password."
@@ -23,12 +29,19 @@ class Authorization : Command{
         println("password: $password")
 
         databaseManager.getConnectionToDataBase()
-        for (pair in databaseManager.getLoginWithPassword()) {
-            if (pair.key == login && pair.value == password) {
-                returnLine = "Вы авторизованы."
+        val resultReq = databaseManager.getLoginWithPassword()
+        val allId = resultReq.keys.toMutableList()
+        val logins = resultReq.values.toMutableList()
+
+        for (i in 0 until resultReq.size){
+            if (logins[i].first == login && logins[i].second == databaseManager sha256 password){
+                val token = authManager.manage(allId[i], login)
+                uSender setClientToken token
+                returnLine = "Вы авторизованы"
                 break
             }
         }
+
         return Result(returnLine, true)
     }
 

@@ -1,16 +1,24 @@
 package multilib.app.commands
 
 
-import multilib.app.city.arrayFreeId
 import multilib.server.collection
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.MoreArgumentsInCommand
-import multilib.app.commands.tools.Result
-import multilib.app.commands.tools.SetMapForCommand
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.MoreArgumentsInCommand
+import multilib.server.commands.tools.Result
+import multilib.server.commands.tools.SetMapForCommand
+import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
+import multilib.server.commands.Command
+import multilib.server.commands.Var
+import multilib.server.jwt.Builder
+import multilib.server.uSender
+import java.time.ZonedDateTime
 
 private var arrayOfId = emptyArray<Long>()
 class RemoveById : Command {
-
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
 
     override val hidden: Boolean
         get() = true
@@ -20,7 +28,7 @@ class RemoveById : Command {
 
     override fun comply(variables: HashMap<String, Any>): Result {
         val numbersOfId = variables[Var.numbersOfId].toString().toInt()
-
+        var list = mutableListOf<CommitDto>()
         var message = "Города удалены."
         if (c.size == 0){
             message = "Коллекция пуста. Нечего изменять."
@@ -28,9 +36,9 @@ class RemoveById : Command {
             for (id in 1..numbersOfId){
                 addIdInArray(variables[id.toString()].toString().toLong())
             }
-            removeAllCity(arrayOfId)
+            list = removeAllCity(arrayOfId)
         }
-        return Result(message, true)
+        return Result(message, true, list)
     }
 
     override fun setMapForClient(): HashMap<String, String> {
@@ -60,20 +68,19 @@ class RemoveById : Command {
             arrayOf(id)
         }
     }
-    private fun removeAllCity(array : Array<Long>){
+    private fun removeAllCity(array : Array<Long>) : MutableList<CommitDto>{
+        val list = mutableListOf<CommitDto>()
         val iterator = collection.getCollection().iterator()
         while (iterator.hasNext()) {
             val iterCity = iterator.next()
+            val token = Builder().verify(uSender.getToken()).data["login"]!!
             for (id in array){
-                if (iterCity.getId() == id) {
-                    arrayFreeId = if (arrayFreeId.isNotEmpty()){
-                        arrayFreeId.clone() + iterCity.getId()!!
-                    } else{
-                        arrayOf(iterCity.getId()!!)
-                    }
+                if (iterCity.getId() == id && token == iterCity.getOwner().second) {
+                    list.add(CommitDto(iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
                     iterator.remove()
                 }
             }
         }
+        return list
     }
 }

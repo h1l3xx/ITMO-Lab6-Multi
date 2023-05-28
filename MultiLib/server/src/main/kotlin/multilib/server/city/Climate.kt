@@ -1,4 +1,4 @@
-package multilib.app.city
+package multilib.server.city
 
 enum class Climate {
     HUMIDCONTINENTAL,

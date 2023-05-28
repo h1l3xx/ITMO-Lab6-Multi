@@ -2,10 +2,18 @@ package multilib.app.commands
 
 
 import multilib.server.collection
-import multilib.app.commands.tools.*
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
+import multilib.server.commands.Command
+import multilib.server.commands.Var
+import multilib.server.commands.tools.*
+import multilib.server.jwt.Builder
+import multilib.server.uSender
 
 
 class UpdateById : Command {
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
     override val hidden: Boolean
         get() = true
     private val argsInfo = ArgsInfo()
@@ -14,23 +22,25 @@ class UpdateById : Command {
     private val setMapForCommand = SetMapForCommand()
     override fun comply(variables: HashMap<String, Any>): Result {
         val c = collection.getCollection()
-        var message = "Значение полей города обновлены."
+        var result = Result("", true)
         if (c.size == 0){
-            message = "Коллекция пуста. Нечего изменять."
+            result.message = "Коллекция пуста. Нечего изменять."
         }else{
             val iterator = collection.getCollection().iterator()
+            val token = Builder().verify(uSender.getToken()).data["login"]!!
             while (!detector && iterator.hasNext()) {
                 val iterCity = iterator.next()
-                if (iterCity.getId() == variables[Var.id].toString().toLong()) {
-                    updater.updateCity(iterCity, variables)
+                if (iterCity.getId() == variables[Var.id].toString().toLong() && token == iterCity.getOwner().second) {
+                    result = updater.updateCity(iterCity, variables)
+                    result.message = "Значение полей города обновлены."
                     detector = true
                 }
             }
             if (!this.detector){
-                message = "Города с таким id не существует."
+                result.message = "Города с таким id не существует."
             }
         }
-        return Result(message, true)
+        return result
     }
 
     override fun getName(): String {

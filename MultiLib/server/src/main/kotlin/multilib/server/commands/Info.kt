@@ -1,10 +1,12 @@
-package multilib.app.commands
+package multilib.server.commands
 
 
 import multilib.server.collection
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.Result
-import multilib.app.commands.tools.SetMapForCommand
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.Result
+import multilib.server.commands.tools.SetMapForCommand
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
 import multilib.server.uSender
 
 
@@ -12,6 +14,8 @@ class Info : Command {
 
     override val hidden: Boolean
         get() = true
+    override val sync: SyncDto
+        get() = SyncDto(Types.SYNC)
 
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()

@@ -1,14 +1,17 @@
 package multilib.server.commands
 
 
-import multilib.app.commands.Command
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.Result
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.Result
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
 import multilib.server.collection
 import multilib.server.database.DatabaseManager
 
 
 class Save : Command {
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
     override val hidden: Boolean
         get() = false
     private val argsInfo = ArgsInfo()
@@ -17,10 +20,14 @@ class Save : Command {
     override fun comply(variables: HashMap<String, Any>): Result {
         databaseManager.getConnectionToDataBase()
 
+        databaseManager.clearTable("collection")
+        databaseManager.clearTable("governors")
+        databaseManager.clearTable("coordinates")
+
         val cl = collection.getCollection()
 
         for (city in cl){
-            databaseManager.addOrg(city)
+            databaseManager addCity city
         }
 
         return Result("Коллекция сохранена в БД", true)

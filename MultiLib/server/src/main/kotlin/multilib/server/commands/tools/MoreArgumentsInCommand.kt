@@ -1,4 +1,4 @@
-package multilib.app.commands.tools
+package multilib.server.commands.tools
 
 class MoreArgumentsInCommand {
     fun moreArguments(arguments : List<String>, value : String): HashMap<String, Any> {

@@ -55,7 +55,7 @@ class FileManager {
         return true
     }
     private fun setFile(files : String){
-        this.file = emptyList<String>()
+        this.file = emptyList()
         this.file = files.lines().dropLast(1)
     }
     private fun getFile(): List<String> {

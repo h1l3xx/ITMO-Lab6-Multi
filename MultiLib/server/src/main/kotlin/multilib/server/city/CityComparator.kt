@@ -1,4 +1,5 @@
-package multilib.app.city
+package multilib.server.city
+
 
 class CityComparator : Comparator<City?> {
     override fun compare(o1: City?, o2: City?): Int {

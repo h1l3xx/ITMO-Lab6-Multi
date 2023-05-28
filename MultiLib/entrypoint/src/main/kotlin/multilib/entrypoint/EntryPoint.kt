@@ -1,7 +1,10 @@
 package multilib.entrypoint
 
 import multilib.lib.list.*
-import multilib.list.*
+import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.MessageDto
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
 
 import java.net.InetSocketAddress
 import java.net.SocketAddress
@@ -11,14 +14,16 @@ import java.nio.channels.DatagramChannel
 class EntryPoint : Channel(DatagramChannel.open()) {
     private var serversList = mutableListOf<ConnectionList>()
     private var clientList = mutableListOf<ConnectionList>()
+    private var commits = mutableListOf<CommitDto>()
+    private var ePToken = ""
 
-    var EPAddr : SocketAddress
+    var ePAddr : SocketAddress
     private val balancer = Balancer()
 
     init {
         val address = InetSocketAddress(Config.servAdr, 3000)
         this.channel.bind(address)
-        EPAddr = this.channel.localAddress
+        ePAddr = this.channel.localAddress
     }
     fun start(){
         println("Entry Point is running.")
@@ -84,10 +89,11 @@ class EntryPoint : Channel(DatagramChannel.open()) {
     }
     private fun serverManager(request: Request, address : SocketAddress){
         this checkServer address //Добавили сервер в список (если его там не было).
+
         val message = request.message.message
         println(message)
         if (message.contains("try to connect")){
-            sendRequestToServer(Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), "success")), address)
+            sendRequestToServer(Request(ePToken, ePAddr, ePAddr, 1, MessageDto(emptyList(), "success")), address)
         }else{
             this resendAnswerToClient request
         }
@@ -104,25 +110,44 @@ class EntryPoint : Channel(DatagramChannel.open()) {
         }
     }
     private fun sendRequestToServer(request: Request, clientAddress : SocketAddress){
+        if (request.type == SyncDto(Types.SYNC)){
+            request.list = commits
+            val list = mutableListOf<String>()
+            for (server in serversList){
+                list.add(server.getAddr().toString())
+            }
+            request.serversAddr = list
+        }
         val serverAddress = balancer.balance()
         request.from = clientAddress.toString()
+
+
         balancer increment serverAddress
         
         send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), serverAddress)
 
     }
     private fun sendErrorRequestToClient(address : SocketAddress){
-        val answer = Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), Var.errorServer))
+        val answer = Request(ePToken, ePAddr, ePAddr, 1, MessageDto(emptyList(), Var.errorServer))
         send(ByteBuffer.wrap(serializeRequest(answer).toByteArray()), address)
     }
     private infix fun resendAnswerToClient(request: Request){
+        this checkCommits request.list
         val clientAddress = request.getSender()
         val serverAddress = request.getFrom()
         balancer decrement serverAddress
+        println(commits)
         send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), clientAddress)
     }
     private infix fun successPing(addr: SocketAddress){
-        val answer = Request(EPAddr, EPAddr, 1, MessageDto(emptyList(), "success"))
+        val answer = Request(ePToken, ePAddr, ePAddr, 1, MessageDto(emptyList(), "success"))
         send(ByteBuffer.wrap(serializeRequest(answer).toByteArray()), addr)
+    }
+    private infix fun checkCommits(list : List<CommitDto>){
+        if (list.isNotEmpty()){
+            for (commit in list){
+                commits.add(commit)
+            }
+        }
     }
 }

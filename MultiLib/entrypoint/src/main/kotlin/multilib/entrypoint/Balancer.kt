@@ -18,7 +18,7 @@ class Balancer {
     }
     private fun takeMin() : SocketAddress{
         minWork = 100
-        var returnServer = entryPoint.EPAddr
+        var returnServer = entryPoint.ePAddr
         for (server in workLoud.keys){
             if (workLoud[server]!! < minWork){
                 minWork = workLoud[server]!!

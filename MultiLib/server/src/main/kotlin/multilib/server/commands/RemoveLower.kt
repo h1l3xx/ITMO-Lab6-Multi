@@ -1,8 +1,15 @@
 package multilib.app.commands
 
-import multilib.app.city.arrayFreeId
 import multilib.server.collection
-import multilib.app.commands.tools.*
+import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
+import multilib.server.commands.Command
+import multilib.server.commands.Var
+import multilib.server.commands.tools.*
+import multilib.server.jwt.Builder
+import multilib.server.uSender
+import java.time.ZonedDateTime
 
 object Str {
     const val field = "field"
@@ -10,7 +17,8 @@ object Str {
 }
 
 class RemoveLower : Command {
-
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
     override val hidden: Boolean
         get() = true
     private val argsInfo = ArgsInfo()
@@ -21,16 +29,13 @@ class RemoveLower : Command {
 
         val field = variables[Str.field].toString()
         val arg = variables[Str.arg].toString()
-
+        val commits = mutableListOf<CommitDto>()
         val iterator = collection.getCollection().iterator()
         while (iterator.hasNext()) {
             val iterCity = iterator.next()
-            if (checkField.removeLower(iterCity, field, arg) == Action.remove) {
-                arrayFreeId = if (arrayFreeId.isNotEmpty()){
-                    arrayFreeId.clone() + iterCity.getId()!!
-                } else{
-                    arrayOf(iterCity.getId()!!)
-                }
+            val token = Builder().verify(uSender.getToken()).data["login"]!!
+            if (checkField.removeLower(iterCity, field, arg) == Action.remove && iterCity.getOwner().second == token) {
+                commits.add(CommitDto(iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
                 iterator.remove()
             }
         }

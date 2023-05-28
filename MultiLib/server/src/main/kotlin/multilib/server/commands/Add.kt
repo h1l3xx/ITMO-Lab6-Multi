@@ -1,21 +1,29 @@
-package multilib.app.commands
+package multilib.server.commands
 
 
 
-import multilib.app.city.CityCompareByDefault
-import multilib.app.city.CityCreator
+import multilib.server.city.CityCompareByDefault
+import multilib.server.city.CityCreator
 import multilib.server.collection
-import multilib.app.commands.tools.ArgsInfo
-import multilib.app.commands.tools.SetMapForCommand
-import multilib.app.commands.tools.VarsShaper
-import multilib.app.commands.tools.Result
+import multilib.server.commands.tools.ArgsInfo
+import multilib.server.commands.tools.SetMapForCommand
+import multilib.server.commands.tools.VarsShaper
+import multilib.server.commands.tools.Result
+import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.SyncDto
+import multilib.lib.list.dto.Types
+import multilib.server.database.DatabaseManager
+import multilib.server.jwt.Builder
+import multilib.server.uSender
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 
 object Var{
+    const val type = "type"
     const val login = "login"
     const val password = "password"
     const val hidden = "hidden"
@@ -52,12 +60,16 @@ class Add : Command {
     private val setMapForCommand = SetMapForCommand()
     private val shaper = VarsShaper()
     private val argsInfo = ArgsInfo()
+    override val sync: SyncDto
+        get() = SyncDto(Types.NO_SYNC)
 
     override val hidden: Boolean
         get() = true
     override fun comply(variables: HashMap<String, Any>): Result {
 
-
+        val databaseManager = DatabaseManager()
+        databaseManager.getConnectionToDataBase()
+        val list = mutableListOf<CommitDto>()
         val creator = CityCreator()
         val name = variables[Var.name].toString()
         val coordX = variables[Var.coordinateX].toString().toLong()
@@ -73,16 +85,24 @@ class Add : Command {
         val date: LocalDate = LocalDate.parse(variables[Var.birthday].toString(), formatter)
         val birt: ZonedDateTime = date.atStartOfDay(ZoneId.systemDefault())
 
+        val owner = uSender.getToken()
+
+        val token = Builder().verify(owner)
+
+        val pair = Pair(token.id, token.data["login"]!!)
+
+
         val birthday = ZonedDateTime.parse(birt.toString())
         val age = variables[Var.age].toString().toInt()
-        creator.create(name, coordX, coordY, area, population, meters, agl, climate, government, birthday, age)
-
+        val id = databaseManager.getFreeId("collection")!!.toLong()
+        val commit = creator.create(pair, LocalDateTime.now(), id, name, coordX, coordY, area, population, meters, agl, climate, government, birthday, age)
+        list.add(commit)
         val c = CityCompareByDefault()
         val cl = collection.getCollection()
 
         cl.sortWith(c)
 
-        return Result("Город добавлен в коллекцию", true)
+        return Result("Город добавлен в коллекцию", true, list)
     }
 
     override fun getName(): String {

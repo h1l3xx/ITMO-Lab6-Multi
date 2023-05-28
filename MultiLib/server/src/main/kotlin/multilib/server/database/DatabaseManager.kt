@@ -1,7 +1,9 @@
 package multilib.server.database
 
 import java.sql.Timestamp
-import multilib.app.city.City
+import multilib.server.city.City
+import java.math.BigInteger
+import java.security.MessageDigest
 import java.sql.*
 
 class DatabaseManager {
@@ -11,23 +13,25 @@ class DatabaseManager {
     private var sql = ""
 
 
-    fun getLoginWithPassword():  HashMap<String,String>{
+    fun getLoginWithPassword():  HashMap<Int, Pair<String, String>>{
 
-        sql = "SELECT login, password FROM users;"
-        val returnMap = HashMap<String, String>()
+        sql = "SELECT * FROM users;"
+        val wrapMap : HashMap<Int, Pair<String, String>> = HashMap()
         try {
             preparedStatement = connection.prepareStatement(sql)
 
-            val resultSet = preparedStatement.executeQuery()!!
-
-            while (resultSet.next()){
-                returnMap[resultSet.getString(1)] = resultSet.getString(2)
+           val result = preparedStatement.executeQuery()!!
+            while (result.next()){
+                wrapMap[result.getInt(1)] = Pair(result.getString(2), result.getString(3))
             }
+            return wrapMap
+
+
         }catch (e : SQLException){
             println("Нет подключения к Базе")
             e.printStackTrace()
         }
-        return returnMap
+        return wrapMap
     }
     fun getConnectionToDataBase() {
         try {
@@ -50,7 +54,8 @@ class DatabaseManager {
 
             preparedStatement.setInt(1, 2)
             preparedStatement.setString(2, login)
-            preparedStatement.setString(3, password)
+            val hashPass = this sha256 password
+            preparedStatement.setString(3, hashPass)
 
             preparedStatement.executeUpdate()
 
@@ -60,7 +65,7 @@ class DatabaseManager {
         preparedStatement.close()
         sql = ""
     }
-    fun addOrg(city : City){
+    infix fun addCity(city : City){
 
         try {
             this setCoord  city
@@ -73,7 +78,7 @@ class DatabaseManager {
             println(preparedStatement)
 
             preparedStatement.setInt(1, city.getId()!!.toInt())
-            preparedStatement.setInt(2, city.getId()!!.toInt())
+            preparedStatement.setInt(2, city.getOwner().first)
             preparedStatement.setString(3, city.getName())
             preparedStatement.setInt(4, city.getId()!!.toInt())
 
@@ -99,6 +104,11 @@ class DatabaseManager {
             e.printStackTrace()
         }
         preparedStatement.close()
+    }
+
+    infix fun sha256(input:String): String {
+        val sha = MessageDigest.getInstance("SHA-256")
+        return BigInteger(1, sha.digest(input.toByteArray())).toString(16).padStart(32, '0')
     }
 
     private infix fun setCoord(city : City){
@@ -134,5 +144,55 @@ class DatabaseManager {
         preparedStatement.close()
 
     }
+    infix fun getFreeId(tableName : String) : String? {
+        sql = "SELECT nextval('${tableName}_id_seq');"
+        return try {
+            preparedStatement = connection.prepareStatement(sql)
 
+            var returnLine = ""
+
+            val resultSet = preparedStatement.executeQuery()!!
+
+            if(resultSet.next()){
+                returnLine = resultSet.getString(1)
+            }
+            returnLine
+        }catch (e : SQLException){
+            e.printStackTrace()
+            "-1"
+        }
+    }
+
+    fun getCollection() : ResultSet?{
+        sql = "SELECT * FROM collection;"
+        return try {
+            preparedStatement = connection.prepareStatement(sql)
+
+            preparedStatement.executeQuery()!!
+        }catch (e : SQLException){
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun getFromTable(tableName: String) : ResultSet?{
+        sql = "SELECT * FROM $tableName;"
+        return try {
+            preparedStatement = connection.prepareStatement(sql)
+
+            return preparedStatement.executeQuery()!!
+        }catch (e : SQLException){
+            e.printStackTrace()
+            null
+        }
+    }
+    fun clearTable(tableName : String){
+        sql = "DELETE FROM $tableName;"
+        try{
+            preparedStatement = connection.prepareStatement(sql)
+            preparedStatement.executeUpdate()
+        }catch (e : SQLException){
+            e.printStackTrace()
+        }
+    }
 }
