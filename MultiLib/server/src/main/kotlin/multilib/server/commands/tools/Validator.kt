@@ -1,8 +1,8 @@
 package multilib.app.commands.tools
 
 import multilib.app.commandList
+import multilib.lib.list.dto.Types
 import multilib.server.commands.Var
-import multilib.lib.list.dto.SyncDto
 import multilib.server.commands.tools.SetMapForArguments
 import multilib.server.commands.tools.Values
 
@@ -15,7 +15,7 @@ class Validator {
     private var commandName : String? = null
     private var text : String? = null
     private var hidden : Boolean? = null
-    private var type : SyncDto? = null
+    private var type : Types? = null
 
     fun setHidden(hidden : Boolean){
         this.hidden = hidden
@@ -36,7 +36,7 @@ class Validator {
     fun setInline(value: Boolean){
         this.inline = value
     }
-    fun setDto(dto : SyncDto){
+    fun setDto(dto : Types){
         this.type = dto
     }
     fun createMap() : HashMap<String, String>{

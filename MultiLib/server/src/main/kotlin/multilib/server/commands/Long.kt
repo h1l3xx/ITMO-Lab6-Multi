@@ -3,13 +3,16 @@ package multilib.server.commands
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.SetMapForCommand
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import multilib.lib.list.printers.UPrinter
+import multilib.server.server.UpdServer
+import java.util.*
+import kotlin.collections.HashMap
+import kotlin.concurrent.schedule
 
 class Long : Command {
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
     override val hidden: Boolean
         get() = false
     private val argsInfo = ArgsInfo()
@@ -27,13 +30,13 @@ class Long : Command {
     }
 
     override fun argsInfo(): HashMap<String, Int> {
-        return argsInfo.setLimits(0,0,1)
+        return argsInfo.setLimits(0,0,0)
     }
 
     override fun comply(variables: HashMap<String, Any>): Result {
-        UPrinter().print { "Timer is running" }
-        Thread.sleep(10_000)
-        UPrinter().print { "Timer is finished" }
+        Timer().schedule(10000) {
+            println("bob")
+        }
         return Result("Команда выполнена", true)
     }
 

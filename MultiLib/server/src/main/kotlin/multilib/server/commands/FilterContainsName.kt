@@ -5,7 +5,6 @@ import multilib.server.collection
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.SetMapForCommand
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 
 
@@ -13,8 +12,8 @@ class FilterContainsName : Command {
 
     override val hidden: Boolean
         get() = true
-    override val sync: SyncDto
-        get() = SyncDto(Types.SYNC)
+    override val type: Types
+        get() = Types.SYNC
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
     override fun comply(variables: HashMap<String, Any>): Result {

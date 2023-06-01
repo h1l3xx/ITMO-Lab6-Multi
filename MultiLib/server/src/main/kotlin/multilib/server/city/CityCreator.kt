@@ -46,6 +46,7 @@ class CityCreator {
         val map : HashMap<String, String> = HashMap()
 
         map[Var.id] = id.toString()
+        map[Var.login] = owner.second
         map[Var.name] = name
         map[Var.coordinateX] = coordX.toString()
         map[Var.coordinateY] = coordY.toString()

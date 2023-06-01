@@ -1,8 +1,8 @@
 package multilib.app.commands
 
 
+import multilib.lib.list.dto.CommitDto
 import multilib.server.collection
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import multilib.server.commands.Command
 import multilib.server.commands.Var
@@ -12,17 +12,22 @@ import multilib.server.uSender
 
 
 class UpdateById : Command {
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
     override val hidden: Boolean
         get() = true
+    private val list = mutableListOf<CommitDto>()
     private val argsInfo = ArgsInfo()
     private val updater = CityUpdater()
     private var detector = false
     private val setMapForCommand = SetMapForCommand()
     override fun comply(variables: HashMap<String, Any>): Result {
+        variables.values.forEach { it.toString() }
         val c = collection.getCollection()
         var result = Result("", true)
+
+
+        val res = variables.map {  e -> e.key to e.value.toString() }.toMap() as HashMap<String, String>
         if (c.size == 0){
             result.message = "Коллекция пуста. Нечего изменять."
         }else{
@@ -31,7 +36,7 @@ class UpdateById : Command {
             while (!detector && iterator.hasNext()) {
                 val iterCity = iterator.next()
                 if (iterCity.getId() == variables[Var.id].toString().toLong() && token == iterCity.getOwner().second) {
-                    result = updater.updateCity(iterCity, variables)
+                    result = updater.updateCity(iterCity, res)
                     result.message = "Значение полей города обновлены."
                     detector = true
                 }

@@ -3,15 +3,14 @@ package multilib.server.commands
 
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import multilib.server.collection
 import multilib.server.database.DatabaseManager
 
 
 class Save : Command {
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.SYNC
     override val hidden: Boolean
         get() = false
     private val argsInfo = ArgsInfo()

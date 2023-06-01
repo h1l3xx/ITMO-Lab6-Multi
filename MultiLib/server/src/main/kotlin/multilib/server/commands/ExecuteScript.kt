@@ -8,7 +8,6 @@ import multilib.server.commands.tools.SetMapForCommand
 import multilib.server.operator
 import multilib.server.uSender
 import multilib.lib.list.dto.MessageDto
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 
 import java.util.*
@@ -17,8 +16,8 @@ var stack = false
 class ExecuteScript: Command {
     override val hidden: Boolean
         get() = true
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
 
     private val setMapForCommand = SetMapForCommand()
     private val argsInfo = ArgsInfo()

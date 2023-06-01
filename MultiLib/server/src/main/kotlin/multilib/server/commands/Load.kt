@@ -2,7 +2,6 @@ package multilib.server.commands
 import multilib.server.city.CityCreator
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import multilib.server.database.DatabaseManager
 import java.sql.ResultSet
@@ -18,8 +17,8 @@ class Load : Command {
         get() = true
 
     private val databaseManger = DatabaseManager()
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
 
     override fun comply(variables: HashMap<String, Any>): Result {
 

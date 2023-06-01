@@ -5,7 +5,6 @@ import multilib.server.collection
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.CommitDto
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import multilib.server.jwt.Builder
 import multilib.server.uSender
@@ -14,8 +13,8 @@ import java.time.ZonedDateTime
 class Clear : Command {
     override val hidden: Boolean
         get() = true
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
 
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()

@@ -5,7 +5,6 @@ import multilib.server.commands.Var
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.SetMapForCommand
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import multilib.server.database.DatabaseManager
 
@@ -13,8 +12,8 @@ class SignUp : Command {
     private val argsInfo = ArgsInfo()
     private val databaseManager = DatabaseManager()
     private val setMapForCommand = SetMapForCommand()
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
     override fun setMapForClient(): HashMap<String, String> {
         return setMapForCommand.setMapForCommand(2,2,false, SignUp(), Var.str + "; " + Var.str)
     }

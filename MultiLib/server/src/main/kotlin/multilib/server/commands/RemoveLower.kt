@@ -2,7 +2,6 @@ package multilib.app.commands
 
 import multilib.server.collection
 import multilib.lib.list.dto.CommitDto
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import multilib.server.commands.Command
 import multilib.server.commands.Var
@@ -17,8 +16,8 @@ object Str {
 }
 
 class RemoveLower : Command {
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
     override val hidden: Boolean
         get() = true
     private val argsInfo = ArgsInfo()

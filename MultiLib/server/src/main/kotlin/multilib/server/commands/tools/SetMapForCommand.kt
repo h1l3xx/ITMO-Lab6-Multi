@@ -13,7 +13,7 @@ class SetMapForCommand {
         commandInfo.setMax(max)
         commandInfo.setMin(min)
         commandInfo.setHidden(command.hidden)
-        commandInfo.setDto(command.sync)
+        commandInfo.setDto(command.type)
         if (command.getName() == Add().getName()){
             commandInfo.setText(BuilderTextForAddCommand().build(VarsShaper().listForAddCommand))
         }else{

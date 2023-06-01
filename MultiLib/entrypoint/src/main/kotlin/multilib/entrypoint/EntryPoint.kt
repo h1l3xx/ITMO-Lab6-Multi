@@ -3,7 +3,6 @@ package multilib.entrypoint
 import multilib.lib.list.*
 import multilib.lib.list.dto.CommitDto
 import multilib.lib.list.dto.MessageDto
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 
 import java.net.InetSocketAddress
@@ -103,15 +102,21 @@ class EntryPoint : Channel(DatagramChannel.open()) {
             this successPing address
         }else if (serversList.isNotEmpty()){
             this checkClient address
-            sendRequestToServer(request, address)
+            if (this checkCommits request) {
+                sendRequestToServer(request, address)
+            }else{
+                //val badReq = Request(ePToken, request.sender, request.from, 0, MessageDto(emptyList(), "Невозможное изменение. Посмотрите состояние коллекции."))
+                sendErrorRequestToClient(SocketAddressInterpreter().interpret(request.sender))
+            }
         }else{
             this checkClient address
             sendErrorRequestToClient(address)
         }
     }
     private fun sendRequestToServer(request: Request, clientAddress : SocketAddress){
-        if (request.type == SyncDto(Types.SYNC)){
+        if (request.type == Types.SYNC){
             request.list = commits
+            commits = mutableListOf()
             val list = mutableListOf<String>()
             for (server in serversList){
                 list.add(server.getAddr().toString())
@@ -149,5 +154,24 @@ class EntryPoint : Channel(DatagramChannel.open()) {
                 commits.add(commit)
             }
         }
+    }
+
+    private infix fun checkCommits(request : Request) : Boolean{
+        return if (commits.isNotEmpty() && this checkCommand request.message.message){
+            for (commit in commits){
+                val el = request.message.message.split(" ")
+                if (commit.id == el[1].toInt() && commit.data.isNullOrEmpty()){
+                    return false
+                }
+            }
+            true
+        }else{
+            println("I'm here")
+            true
+        }
+    }
+
+    private infix fun checkCommand(message : String): Boolean {
+        return message.contains("update_by_id") || message.contains("remove_by_id")
     }
 }

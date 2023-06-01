@@ -7,14 +7,13 @@ import multilib.server.commands.tools.CheckArg
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.CommitDto
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import java.time.ZonedDateTime
 
 
 class RemoveAt : Command {
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
     override val hidden: Boolean
         get() = true
     private val argsInfo = ArgsInfo()

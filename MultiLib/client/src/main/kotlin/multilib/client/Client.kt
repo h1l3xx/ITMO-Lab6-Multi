@@ -5,7 +5,6 @@ import multilib.client.handkers.Connect
 import multilib.lib.list.*
 import multilib.lib.list.Config
 import multilib.lib.list.dto.MessageDto
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import java.net.InetSocketAddress
 import java.net.PortUnreachableException
@@ -58,12 +57,12 @@ class Client : Channel(DatagramChannel.open()){
         println("Происходит отключение...")
         exitProcess(21)
     }
-    fun sendMessage(mess: String, type: String?) {
+    fun sendMessage(mess: String, type: String) {
         val request = Request(this.token, channel.localAddress, entryPointAddress, 0, MessageDto(emptyList(),mess), emptyList(), null)
         if (type == Types.SYNC.toString()){
-            request.type = SyncDto(Types.SYNC)
+            request.type = Types.SYNC
         }else if (type == Types.NO_SYNC.toString()){
-            request.type = SyncDto(Types.NO_SYNC)
+            request.type = Types.NO_SYNC
         }
         send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), entryPointAddress)
     }

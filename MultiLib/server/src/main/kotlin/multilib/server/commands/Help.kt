@@ -7,7 +7,6 @@ import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.server.uSender
 import multilib.lib.list.dto.MessageDto
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 
 
@@ -15,8 +14,8 @@ class Help : Command {
 
     override val hidden: Boolean
         get() = true
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
 
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()

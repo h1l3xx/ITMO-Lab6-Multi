@@ -1,11 +1,11 @@
 package multilib.server.commands
 
+import multilib.lib.list.dto.Types
 import multilib.server.commands.tools.Result
-import multilib.lib.list.dto.SyncDto
 
 interface Command {
 
-    val sync : SyncDto
+    val type : Types
 
     val hidden : Boolean
     fun comply(variables: HashMap<String, Any>): Result

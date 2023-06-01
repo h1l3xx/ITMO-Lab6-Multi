@@ -7,14 +7,13 @@ import multilib.server.collection
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.SetMapForCommand
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import multilib.server.commands.Command
 
 
 class Sort : Command {
-    override val sync: SyncDto
-        get() = SyncDto(Types.SYNC)
+    override val type: Types
+        get() = Types.SYNC
     override val hidden: Boolean
         get() = true
     private val argsInfo = ArgsInfo()

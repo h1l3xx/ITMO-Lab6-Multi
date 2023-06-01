@@ -7,7 +7,6 @@ import multilib.server.commands.tools.MoreArgumentsInCommand
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.CommitDto
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import multilib.server.commands.Command
 import multilib.server.commands.Var
@@ -17,8 +16,8 @@ import java.time.ZonedDateTime
 
 private var arrayOfId = emptyArray<Long>()
 class RemoveById : Command {
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
 
     override val hidden: Boolean
         get() = true

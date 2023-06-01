@@ -10,6 +10,7 @@ import multilib.lib.list.*
 import multilib.lib.list.printers.UPrinter
 import multilib.lib.list.Config
 import multilib.lib.list.dto.MessageDto
+import multilib.server.database.Synchronizer
 
 import java.net.InetSocketAddress
 import java.net.PortUnreachableException
@@ -22,6 +23,7 @@ class UpdServer : Channel(DatagramChannel.open()) {
     private var running = true
     private val uPrinter = UPrinter()
     private var serverToken = ""
+
 
     private val entryPointAddress : SocketAddress = InetSocketAddress(Config.servAdr, Config.port)
 
@@ -76,7 +78,7 @@ class UpdServer : Channel(DatagramChannel.open()) {
             }else{
 
                 println(req.message.message)
-                operator.runCommand(req.message.message)
+                operator.checkSync(req)
             }
         }
     }

@@ -10,7 +10,6 @@ import multilib.server.commands.tools.SetMapForCommand
 import multilib.server.commands.tools.VarsShaper
 import multilib.server.commands.tools.Result
 import multilib.lib.list.dto.CommitDto
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import multilib.server.database.DatabaseManager
 import multilib.server.jwt.Builder
@@ -60,8 +59,8 @@ class Add : Command {
     private val setMapForCommand = SetMapForCommand()
     private val shaper = VarsShaper()
     private val argsInfo = ArgsInfo()
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
 
     override val hidden: Boolean
         get() = true

@@ -75,7 +75,7 @@ class Manager {
     fun continueManage(command : String, arguments : List<String>, client : Client){
         if (arguments.isEmpty() && !commandList[command]!![Var.description]!!.contains(Var.allFields)){
 
-            client.sendMessage(command, commandList[command]!![Var.type])
+            client.sendMessage(command, commandList[command]!![Var.type].toString())
             uPrinter.print { getMessage(client)}
         }else{
             if (validateArguments(command, arguments, client)){
@@ -91,7 +91,7 @@ class Manager {
                 uPrinter.print { returnValue }
                 false
             }else{
-                client.sendMessage("$c $returnValue", commandList[c]!![Var.type])
+                client.sendMessage("$c $returnValue", commandList[c]!![Var.type].toString())
                 true
             }
         }else if (!description.contains(Var.allFields)  && !description.contains(Var.wayToFile)){
@@ -101,7 +101,7 @@ class Manager {
                 uPrinter.print { returnValue }
                 false
             }else{
-                client.sendMessage("$c $returnValue", commandList[c]!![Var.type])
+                client.sendMessage("$c $returnValue", commandList[c]!![Var.type].toString())
                 true
             }
         }else if (description.contains(Var.allFields)  && !description.contains(Var.wayToFile)){
@@ -110,12 +110,12 @@ class Manager {
                 uPrinter.print { answer }
                 false
             }else{
-                client.sendMessage("$c $answer", commandList[c]!![Var.type])
+                client.sendMessage("$c $answer", commandList[c]!![Var.type].toString())
                 true
             }
         }else{
             if ((validator workWithFile a).isNotEmpty()){
-                client.sendMessage((validator workWithFile a).toString(), commandList[c]!![Var.type])
+                client.sendMessage((validator workWithFile a).toString(), commandList[c]!![Var.type].toString())
             }
             return true
         }
@@ -142,7 +142,7 @@ class Manager {
         thread {
             var run = connectToEP
             while (run) {
-                Thread.sleep(8_000)
+                Thread.sleep(60_000)
                 client.sendMessage("ping from client", Types.NO_SYNC.toString())
                 val answer = client.getMessage().message.message
                 if (answer != "success"){

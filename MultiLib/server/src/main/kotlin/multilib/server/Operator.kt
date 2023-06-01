@@ -1,15 +1,34 @@
 package multilib.app
 
 
+import multilib.lib.list.Request
 import multilib.server.commands.ExecuteScript
 import multilib.lib.list.dto.MessageDto
+import multilib.lib.list.dto.Types
 import multilib.server.commandManager
+import multilib.server.commands.Load
+import multilib.server.database.Synchronizer
 import multilib.server.uSender
 import java.util.*
+import kotlin.collections.HashMap
 
 
 var sc = Scanner(System.`in`)
 class Operator {
+    private val synchronizer = Synchronizer()
+
+    fun checkSync(request : Request){
+        println(request)
+        if (request.type != null && request.type != Types.SYNC && request.message.message != "let's synchronize!"){
+            runCommand(request.message.message)
+        }
+        else if (request.message.message == "let's synchronize!"){
+            Load().comply(HashMap())
+        }else{
+            synchronizer.synchronize(request)
+            runCommand(request.message.message)
+        }
+    }
     fun runCommand(command: String){
         if (command.contains(ExecuteScript().getName())){
             val exAndCom = command.split(", ")

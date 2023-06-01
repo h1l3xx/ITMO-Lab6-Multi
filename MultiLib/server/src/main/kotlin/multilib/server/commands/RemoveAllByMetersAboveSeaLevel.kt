@@ -5,7 +5,6 @@ import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.CommitDto
-import multilib.lib.list.dto.SyncDto
 import multilib.lib.list.dto.Types
 import multilib.server.jwt.Builder
 import multilib.server.uSender
@@ -19,8 +18,8 @@ class RemoveAllByMetersAboveSeaLevel: Command {
     val commits = mutableListOf<CommitDto>()
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
-    override val sync: SyncDto
-        get() = SyncDto(Types.NO_SYNC)
+    override val type: Types
+        get() = Types.NO_SYNC
     override fun comply(variables: HashMap<String, Any>): Result {
 
 
