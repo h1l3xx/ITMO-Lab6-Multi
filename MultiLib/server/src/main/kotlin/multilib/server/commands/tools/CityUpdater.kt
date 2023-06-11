@@ -1,9 +1,14 @@
 package multilib.server.commands.tools
 
+import multilib.lib.list.dto.CommitType
 import multilib.server.city.City
 import multilib.server.city.CityCreator
 import multilib.server.collection
+import multilib.server.commands.Var
+import java.time.LocalDate
+import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 
 class CityUpdater {
@@ -23,9 +28,14 @@ private fun fullUpdate(city: City, a: HashMap<String, String>) : Result {
     }
     println(arguments)
     val cityCreator = CityCreator()
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val date: LocalDate = LocalDate.parse(arguments[11], formatter)
+    val birt: ZonedDateTime = date.atStartOfDay(ZoneId.systemDefault())
+
     val commit = cityCreator.create(city.getOwner(), city.getCreationDate()!!, arguments[0].toLong(), arguments[1],
         arguments[2].toLong(), arguments[3].toFloat(), arguments[4].toInt(), arguments[5].toLong(), arguments[6].toLong(),
-        arguments[7].toDouble(), arguments[8], arguments[9], ZonedDateTime.parse(arguments[11]), arguments[10].toInt())
+        arguments[7].toDouble(), arguments[8], arguments[9], birt, arguments[10].toInt())
+    commit.type = CommitType.UPDATE
 
     return Result("Поля города изменены", true, listOf(commit))
 }

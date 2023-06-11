@@ -5,8 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CommitDto(
-    val id: Int,
-    val data: HashMap<String, String>?,
-    val timestamp: Long
+        var type : CommitType,
+        val id: Int,
+        val data: HashMap<String, String>?,
+        val timestamp: Long
 ) {
 }

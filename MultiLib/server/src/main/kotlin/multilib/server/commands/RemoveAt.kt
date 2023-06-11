@@ -7,6 +7,7 @@ import multilib.server.commands.tools.CheckArg
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.CommitType
 import multilib.lib.list.dto.Types
 import java.time.ZonedDateTime
 
@@ -29,7 +30,7 @@ class RemoveAt : Command {
         message = if (cl.size-1 < argument){
             "В коллекции нет города под таким индексом."
         }else{
-            list.add(CommitDto(cl[argument].getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
+            list.add(CommitDto(CommitType.REMOVE, cl[argument].getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
             cl.removeAt(argument)
             "Город с указанным индексом удален."
         }

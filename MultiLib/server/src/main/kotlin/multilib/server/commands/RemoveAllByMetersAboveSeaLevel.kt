@@ -5,6 +5,7 @@ import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.CommitType
 import multilib.lib.list.dto.Types
 import multilib.server.jwt.Builder
 import multilib.server.uSender
@@ -28,7 +29,7 @@ class RemoveAllByMetersAboveSeaLevel: Command {
         while (iterator.hasNext()) {
             val iterCity = iterator.next()
             if (iterCity.getMetersAboveSeaLevel() == variables[Var.meters] && token == iterCity.getOwner().second) {
-                commits.add(CommitDto(iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
+                commits.add(CommitDto(CommitType.REMOVE, iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
                 iterator.remove()
             }
         }

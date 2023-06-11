@@ -5,6 +5,7 @@ import multilib.server.collection
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.CommitType
 import multilib.lib.list.dto.Types
 import multilib.server.jwt.Builder
 import multilib.server.uSender
@@ -26,7 +27,7 @@ class Clear : Command {
             val iterCity = iterator.next()
             val token = Builder().verify(uSender.getToken()).data["login"]!!
             if (iterCity.getOwner().second == token) {
-                list.add(CommitDto(iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
+                list.add(CommitDto(CommitType.REMOVE, iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
                 iterator.remove()
             }
         }

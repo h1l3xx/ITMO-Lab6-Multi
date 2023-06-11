@@ -2,6 +2,7 @@ package multilib.app.commands
 
 import multilib.server.collection
 import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.CommitType
 import multilib.lib.list.dto.Types
 import multilib.server.commands.Command
 import multilib.server.commands.Var
@@ -34,7 +35,7 @@ class RemoveLower : Command {
             val iterCity = iterator.next()
             val token = Builder().verify(uSender.getToken()).data["login"]!!
             if (checkField.removeLower(iterCity, field, arg) == Action.remove && iterCity.getOwner().second == token) {
-                commits.add(CommitDto(iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
+                commits.add(CommitDto(CommitType.REMOVE, iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
                 iterator.remove()
             }
         }

@@ -7,6 +7,7 @@ import multilib.server.commands.tools.MoreArgumentsInCommand
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.CommitType
 import multilib.lib.list.dto.Types
 import multilib.server.commands.Command
 import multilib.server.commands.Var
@@ -75,7 +76,7 @@ class RemoveById : Command {
             val token = Builder().verify(uSender.getToken()).data["login"]!!
             for (id in array){
                 if (iterCity.getId() == id && token == iterCity.getOwner().second) {
-                    list.add(CommitDto(iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
+                    list.add(CommitDto(CommitType.REMOVE, iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
                     iterator.remove()
                 }
             }

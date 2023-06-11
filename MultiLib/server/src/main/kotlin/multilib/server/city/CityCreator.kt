@@ -5,6 +5,7 @@ package multilib.server.city
 
 import multilib.server.commands.Var
 import multilib.lib.list.dto.CommitDto
+import multilib.lib.list.dto.CommitType
 import multilib.server.collection
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
@@ -60,6 +61,6 @@ class CityCreator {
 
         collection.add(city)
 
-        return CommitDto(map[Var.id]!!.toInt(), map, ZonedDateTime.now().toEpochSecond())
+        return CommitDto(CommitType.ADD ,map[Var.id]!!.toInt(), map, ZonedDateTime.now().toEpochSecond())
     }
 }

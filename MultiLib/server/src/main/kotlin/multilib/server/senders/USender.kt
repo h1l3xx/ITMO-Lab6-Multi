@@ -63,6 +63,9 @@ class USender : Sender {
         channel!!.send(ByteBuffer.wrap(answerServer.toByteArray()), addr)
         this setLast request
     }
+
+    private fun serversInfo(info : String, serverAddress: SocketAddress){
+    }
     private infix fun setLast(request: Request){
         this.lastMessage = request
     }

@@ -55,6 +55,9 @@ class Manager {
 
             val command = scanner.readLine()
 
+            if (command == null)
+                continue;
+
             val commandAndArguments = command!!.split(" ")
             val name = commandAndArguments[0]
             var arguments = commandAndArguments.drop(1)
@@ -128,7 +131,7 @@ class Manager {
             }
             value.message.message
         }catch (e : Exception){
-            Connect().tryAgain()
+            e.printStackTrace()
             "Отсутствует подключение к серверу. Повторная попытка через 10 секунд."
         }
     }
