@@ -51,13 +51,15 @@ class CityCreator {
         map[Var.name] = name
         map[Var.coordinateX] = coordX.toString()
         map[Var.coordinateY] = coordY.toString()
+        map[Var.area] = area.toString()
         map[Var.population] = population.toString()
         map[Var.meters] = meters.toString()
         map[Var.agl] = agl.toString()
         map[Var.climate] = climate
         map[Var.government] = government
         map[Var.age] = age.toString()
-        map[Var.birthday] = birthday.toString()
+        map[Var.date] = creationDate.toString()
+         map[Var.birthday] = birthday.toString()
 
         collection.add(city)
 

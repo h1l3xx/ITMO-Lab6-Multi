@@ -19,9 +19,11 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.Long
 
 
 object Var{
+    const val date = "date"
     const val type = "type"
     const val login = "login"
     const val password = "password"
@@ -80,10 +82,21 @@ class Add : Command {
         val climate = variables[Var.climate].toString()
         val government = variables[Var.government].toString()
 
-        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        val date: LocalDate = LocalDate.parse(variables[Var.birthday].toString(), formatter)
-        val birt: ZonedDateTime = date.atStartOfDay(ZoneId.systemDefault())
+        val birt : ZonedDateTime
+        val localDate : LocalDateTime
+        val id : Long
 
+        if(variables["id"] == null){
+            val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            val date: LocalDate = LocalDate.parse(variables[Var.birthday].toString(), formatter)
+            birt = date.atStartOfDay(ZoneId.systemDefault())
+            localDate = LocalDateTime.now()
+            id = databaseManager.getFreeId("collection")!!.toLong()
+        }else{
+            id = variables["id"]!!.toString().toLong()
+            birt = ZonedDateTime.parse(variables[Var.birthday].toString())
+            localDate = LocalDateTime.parse(variables[Var.date].toString())
+        }
         val owner = uSender.getToken()
 
         val token = Builder().verify(owner)
@@ -93,8 +106,9 @@ class Add : Command {
 
         val birthday = ZonedDateTime.parse(birt.toString())
         val age = variables[Var.age].toString().toInt()
-        val id = databaseManager.getFreeId("collection")!!.toLong()
-        val commit = creator.create(pair, LocalDateTime.now(), id, name, coordX, coordY, area, population, meters, agl, climate, government, birthday, age)
+
+
+        val commit = creator.create(pair, localDate, id.toString().toLong(), name, coordX, coordY, area, population, meters, agl, climate, government, birthday, age)
         list.add(commit)
         val c = CityCompareByDefault()
         val cl = collection.getCollection()
