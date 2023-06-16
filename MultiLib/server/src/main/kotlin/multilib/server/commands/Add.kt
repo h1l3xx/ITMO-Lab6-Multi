@@ -2,9 +2,10 @@ package multilib.server.commands
 
 
 
-import multilib.server.city.CityCompareByDefault
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import multilib.server.city.CityCreator
-import multilib.server.collection
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.server.commands.tools.VarsShaper
@@ -12,6 +13,7 @@ import multilib.server.commands.tools.Result
 import multilib.lib.list.dto.CommitDto
 import multilib.lib.list.dto.Types
 import multilib.server.database.DatabaseManager
+import multilib.server.jwt.Body
 import multilib.server.jwt.Builder
 import multilib.server.uSender
 import java.time.LocalDate
@@ -66,54 +68,69 @@ class Add : Command {
 
     override val hidden: Boolean
         get() = true
-    override fun comply(variables: HashMap<String, Any>): Result {
-
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
+        val scope = CoroutineScope(Job())
         val databaseManager = DatabaseManager()
-        databaseManager.getConnectionToDataBase()
         val list = mutableListOf<CommitDto>()
         val creator = CityCreator()
-        val name = variables[Var.name].toString()
-        val coordX = variables[Var.coordinateX].toString().toLong()
-        val coordY = variables[Var.coordinateY].toString().toFloat()
-        val area = variables[Var.area].toString().toInt()
-        val population = variables[Var.population].toString().toLong()
-        val meters = variables[Var.meters].toString().toLong()
-        val agl = variables[Var.agl].toString().toDouble()
-        val climate = variables[Var.climate].toString()
-        val government = variables[Var.government].toString()
+        var name : String? = null
+        var coordX : Long? = null
+        var coordY : Float? = null
+        var area : Int? = null
+        var population : Long? = null
+        var meters : Long? = null
+        var agl : Double? = null
+        var climate : String? = null
+        var government : String? = null
+        var birt : ZonedDateTime? = null
+        var localDate : LocalDateTime? = null
+        var id : Long? = null
+        var age : Int? = null
 
-        val birt : ZonedDateTime
-        val localDate : LocalDateTime
-        val id : Long
-
-        if(variables["id"] == null){
-            val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            val date: LocalDate = LocalDate.parse(variables[Var.birthday].toString(), formatter)
-            birt = date.atStartOfDay(ZoneId.systemDefault())
-            localDate = LocalDateTime.now()
-            id = databaseManager.getFreeId("collection")!!.toLong()
-        }else{
-            id = variables["id"]!!.toString().toLong()
-            birt = ZonedDateTime.parse(variables[Var.birthday].toString())
-            localDate = LocalDateTime.parse(variables[Var.date].toString())
+        var owner : String
+        var token : Body
+        var pair : Pair<Int, String>? = null
+        scope.launch{
+            databaseManager.getConnectionToDataBase()
+        }.join()
+        scope.launch {
+            name = variables[Var.name].toString()
+            coordX = variables[Var.coordinateX].toString().toLong()
+            coordY = variables[Var.coordinateY].toString().toFloat()
+            area = variables[Var.area].toString().toInt()
+            population = variables[Var.population].toString().toLong()
+            meters = variables[Var.meters].toString().toLong()
+            agl = variables[Var.agl].toString().toDouble()
+            climate = variables[Var.climate].toString()
+            government = variables[Var.government].toString()
+            age = variables[Var.age].toString().toInt()
         }
-        val owner = uSender.getToken()
-
-        val token = Builder().verify(owner)
-
-        val pair = Pair(token.id, token.data["login"]!!)
-
-
+        scope.launch {
+            owner = uSender.getToken()
+            token = Builder().verify(owner)
+            pair = Pair(token.id, token.data["login"]!!)
+        }.join()
+            if(variables["id"] == null){
+                scope.launch {
+                    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                    val date: LocalDate = LocalDate.parse(variables[Var.birthday].toString(), formatter)
+                    birt = date.atStartOfDay(ZoneId.systemDefault())
+                    localDate = LocalDateTime.now()
+                    id = databaseManager.getFreeId("collection")!!.toLong()
+                }.join()
+            }else{
+                scope.launch {
+                    id = variables["id"]!!.toString().toLong()
+                    birt = ZonedDateTime.parse(variables[Var.birthday].toString())
+                    localDate = LocalDateTime.parse(variables[Var.date].toString())
+                }.join()
+            }
         val birthday = ZonedDateTime.parse(birt.toString())
-        val age = variables[Var.age].toString().toInt()
 
 
-        val commit = creator.create(pair, localDate, id.toString().toLong(), name, coordX, coordY, area, population, meters, agl, climate, government, birthday, age)
+        val commit = creator.create(pair!!, localDate!!, id.toString().toLong(), name!!, coordX!!, coordY!!,
+            area!!, population!!, meters!!, agl!!, climate!!, government!!, birthday, age!!)
         list.add(commit)
-        val c = CityCompareByDefault()
-        val cl = collection.getCollection()
-
-        cl.sortWith(c)
 
         return Result("Город добавлен в коллекцию", true, list)
     }

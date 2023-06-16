@@ -4,13 +4,11 @@ import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.Types
-import multilib.lib.list.printers.UPrinter
-import multilib.server.server.UpdServer
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.concurrent.schedule
 
-class Long : Command {
+class Long  : Command {
     override val type: Types
         get() = Types.NO_SYNC
     override val hidden: Boolean
@@ -33,7 +31,7 @@ class Long : Command {
         return argsInfo.setLimits(0,0,0)
     }
 
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
         Timer().schedule(10000) {
             println("bob")
         }

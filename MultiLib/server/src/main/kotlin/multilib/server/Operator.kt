@@ -1,35 +1,50 @@
 package multilib.app
 
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import multilib.lib.list.Request
+import multilib.lib.list.dto.Act
 import multilib.server.commands.ExecuteScript
 import multilib.lib.list.dto.MessageDto
 import multilib.lib.list.dto.Types
+import multilib.server.collection
+import multilib.server.collectionActor
 import multilib.server.commandManager
-import multilib.server.commands.Load
+import multilib.server.commands.tools.ActorDto
 import multilib.server.database.Synchronizer
 import multilib.server.uSender
 import java.util.*
-import kotlin.collections.HashMap
 
 
 var sc = Scanner(System.`in`)
 class Operator {
     private val synchronizer = Synchronizer()
-
-    fun checkSync(request : Request){
-        println(request)
+    private val scope = CoroutineScope(Job())
+    fun checkSync(request : Request) = scope.launch{
         if (request.type != null && request.type != Types.SYNC && request.message.message != "let's synchronize!"){
-            runCommand(request.message.message)
+            launch {
+                runCommand(request.message.message)
+            }
         }
         else if (request.message.message == "let's synchronize!"){
-            Load().comply(HashMap())
+            launch {
+                collectionActor.send(
+                    ActorDto(
+                        Pair(Act.LOAD, mutableListOf())
+                    )
+                )
+                println(collection.getCollection().toString())
+            }
         }else{
-            synchronizer.synchronize(request)
-            runCommand(request.message.message)
+            launch {
+                synchronizer.synchronize(request)
+                runCommand(request.message.message)
+            }
         }
     }
-    fun runCommand(command: String){
+    fun runCommand(command: String) = CoroutineScope(scope.coroutineContext + Job()).launch{
         if (command.contains(ExecuteScript().getName())){
             val exAndCom = command.split(", ")
             val com = exAndCom.drop(1)
@@ -51,12 +66,18 @@ class Operator {
                         }
                         argumentsWithoutLast = addArg
                     }
-                    commandManager.manage(name, argumentsWithoutLast)
+                    launch {
+                        commandManager.manage(name, argumentsWithoutLast)
+                    }
                 } else {
-                    commandManager.manage(name, arguments)
+                    launch {
+                        commandManager.manage(name, arguments)
+                    }
                 }
             } else {
-                uSender.print(MessageDto(emptyList(), Messages.MESSAGE), emptyList())
+                launch {
+                    uSender.print(MessageDto(emptyList(), Messages.MESSAGE), emptyList())
+                }
             }
         }
     }

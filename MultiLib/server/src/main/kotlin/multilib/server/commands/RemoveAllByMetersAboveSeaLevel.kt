@@ -1,5 +1,6 @@
 package multilib.server.commands
 
+import multilib.lib.list.dto.Act
 import multilib.server.collection
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
@@ -7,6 +8,9 @@ import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.CommitDto
 import multilib.lib.list.dto.CommitType
 import multilib.lib.list.dto.Types
+import multilib.server.city.City
+import multilib.server.collectionActor
+import multilib.server.commands.tools.ActorDto
 import multilib.server.jwt.Builder
 import multilib.server.uSender
 import java.time.ZonedDateTime
@@ -21,8 +25,8 @@ class RemoveAllByMetersAboveSeaLevel: Command {
     private val setMapForCommand = SetMapForCommand()
     override val type: Types
         get() = Types.NO_SYNC
-    override fun comply(variables: HashMap<String, Any>): Result {
-
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
+        val arr = mutableListOf<City>()
 
         val iterator = collection.getCollection().iterator()
         val token = Builder().verify(uSender.getToken()).data["login"]!!
@@ -30,7 +34,14 @@ class RemoveAllByMetersAboveSeaLevel: Command {
             val iterCity = iterator.next()
             if (iterCity.getMetersAboveSeaLevel() == variables[Var.meters] && token == iterCity.getOwner().second) {
                 commits.add(CommitDto(CommitType.REMOVE, iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
-                iterator.remove()
+                arr.add(iterCity)
+            }
+            arr.forEach {
+                collectionActor.send(
+                    ActorDto(
+                        Pair(Act.REMOVE, mutableListOf(it))
+                    )
+                )
             }
         }
 

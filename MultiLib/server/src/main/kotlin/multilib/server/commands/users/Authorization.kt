@@ -19,7 +19,7 @@ class Authorization : Command {
     private val databaseManager = DatabaseManager()
     private val authManager = AuthManager()
 
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
         var returnLine = "Неправильно введен login или password."
 
         val login = variables[Var.login].toString()

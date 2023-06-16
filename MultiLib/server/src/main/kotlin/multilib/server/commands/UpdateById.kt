@@ -21,7 +21,7 @@ class UpdateById : Command {
     private val updater = CityUpdater()
     private var detector = false
     private val setMapForCommand = SetMapForCommand()
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
         variables.values.forEach { it.toString() }
         val c = collection.getCollection()
         var result = Result("", true)

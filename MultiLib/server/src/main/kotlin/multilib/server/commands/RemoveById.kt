@@ -1,16 +1,16 @@
 package multilib.app.commands
 
 
+import multilib.lib.list.dto.Act
 import multilib.server.collection
-import multilib.server.commands.tools.ArgsInfo
-import multilib.server.commands.tools.MoreArgumentsInCommand
-import multilib.server.commands.tools.Result
-import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.CommitDto
 import multilib.lib.list.dto.CommitType
 import multilib.lib.list.dto.Types
+import multilib.server.city.City
+import multilib.server.collectionActor
 import multilib.server.commands.Command
 import multilib.server.commands.Var
+import multilib.server.commands.tools.*
 import multilib.server.jwt.Builder
 import multilib.server.uSender
 import java.time.ZonedDateTime
@@ -26,7 +26,7 @@ class RemoveById : Command {
     private val setMapForCommand = SetMapForCommand()
     private val c = collection.getCollection()
 
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
         val numbersOfId = variables[Var.numbersOfId].toString().toInt()
         var list = mutableListOf<CommitDto>()
         var message = "Города удалены."
@@ -68,8 +68,9 @@ class RemoveById : Command {
             arrayOf(id)
         }
     }
-    private fun removeAllCity(array : Array<Long>) : MutableList<CommitDto>{
+    private suspend fun removeAllCity(array : Array<Long>) : MutableList<CommitDto>{
         val list = mutableListOf<CommitDto>()
+        val arr = mutableListOf<City>()
         val iterator = collection.getCollection().iterator()
         while (iterator.hasNext()) {
             val iterCity = iterator.next()
@@ -77,8 +78,15 @@ class RemoveById : Command {
             for (id in array){
                 if (iterCity.getId() == id && token == iterCity.getOwner().second) {
                     list.add(CommitDto(CommitType.REMOVE, iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
-                    iterator.remove()
+                    arr.add(iterCity)
                 }
+            }
+            arr.forEach {
+                collectionActor.send(
+                    ActorDto(
+                        Pair(Act.REMOVE, mutableListOf(it))
+                    )
+                )
             }
         }
         return list

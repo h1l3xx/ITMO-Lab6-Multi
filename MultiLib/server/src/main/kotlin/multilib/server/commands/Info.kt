@@ -18,7 +18,7 @@ class Info : Command {
 
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend  fun comply(variables: HashMap<String, Any>): Result {
 
         val collectionInfo = collection.getCollection()
 

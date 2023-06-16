@@ -20,7 +20,9 @@ class Load : Command {
     override val type: Types
         get() = Types.NO_SYNC
 
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
+
+
 
         val cityCreator = CityCreator()
 

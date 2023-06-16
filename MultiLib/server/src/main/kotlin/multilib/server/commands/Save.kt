@@ -4,6 +4,7 @@ package multilib.server.commands
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
 import multilib.lib.list.dto.Types
+import multilib.server.city.City
 import multilib.server.collection
 import multilib.server.database.DatabaseManager
 
@@ -16,7 +17,7 @@ class Save : Command {
     private val argsInfo = ArgsInfo()
     private val databaseManager = DatabaseManager()
 
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
         databaseManager.getConnectionToDataBase()
 
         databaseManager.clearTable("collection")
@@ -30,6 +31,13 @@ class Save : Command {
         }
 
         return Result("Коллекция сохранена в БД", true)
+    }
+
+    fun comply(list : MutableList<City>){
+        databaseManager.getConnectionToDataBase()
+        list.forEach {
+            databaseManager.addCity(it)
+        }
     }
 
     override fun setMapForClient(): HashMap<String, String> {

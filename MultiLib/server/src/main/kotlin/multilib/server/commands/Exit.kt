@@ -1,12 +1,17 @@
 package multilib.server.commands
 
 
+import multilib.lib.list.dto.Act
 import multilib.server.commands.tools.Result
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.SetMapForCommand
 import multilib.server.uSender
 import multilib.lib.list.dto.MessageDto
 import multilib.lib.list.dto.Types
+import multilib.server.city.City
+import multilib.server.collection
+import multilib.server.collectionActor
+import multilib.server.commands.tools.ActorDto
 
 
 object Message {
@@ -22,10 +27,18 @@ class Exit : Command {
     private val setMapForCommand = SetMapForCommand()
     private val printer = uSender
     private val argsInfo = ArgsInfo()
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend  fun comply(variables: HashMap<String, Any>): Result {
         printer.print (MessageDto(emptyList(), Message.MESSAGE), emptyList())
         println("Происходит сохранение...")
-        Save().comply(HashMap())
+        val list = mutableListOf<City>()
+        collection.getCollection().forEach{
+            list.add(it)
+        }
+        collectionActor.send(
+            ActorDto(
+                Pair(Act.SAVE, list)
+            )
+        )
         return Result("Команда выполнена", false)
     }
 
