@@ -12,7 +12,7 @@ object Var{
 }
 class Config {
     companion object{
-        const val servAdr: String = "172.20.48.1"
+        const val servAdr: String = "172.20.10.11"
         const val port: Int = 3000
 
     }

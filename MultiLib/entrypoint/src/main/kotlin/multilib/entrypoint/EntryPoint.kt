@@ -18,7 +18,7 @@ class EntryPoint : Channel(DatagramChannel.open()) {
     private val socketAddressInterpreter = SocketAddressInterpreter()
     private var waiting = false
     private val epActor = EntryPointActor()
-    private var serversList = mutableListOf<ConnectionList>()
+    var serversList = mutableListOf<ConnectionList>()
     private var clientList = mutableListOf<ConnectionList>()
     var commits = mutableListOf<CommitDto>()
     private val scope = CoroutineScope(Job())
@@ -26,7 +26,7 @@ class EntryPoint : Channel(DatagramChannel.open()) {
     private var failedChannel : Ch<Request> = Ch(capacity = Ch.BUFFERED)
 
     var ePAddr : SocketAddress
-    private val balancer = Balancer()
+    val balancer = Balancer()
 
     init {
         val address = InetSocketAddress(Config.servAdr, 3000)
@@ -80,23 +80,36 @@ class EntryPoint : Channel(DatagramChannel.open()) {
         }
     }
 
-    private infix fun checkServer(addr : SocketAddress){
+    private suspend infix fun checkServer(addr : SocketAddress){
+        val list = epActor.getServers(
+            EPActorDto(
+                Changes.GET_SERVERS, null
+            )
+        )
         var checker = false
-        if (serversList.isEmpty()){
-            serversList.add(ConnectionList(addr))
-            balancer.addServerToLoud(addr)
+        if (list.isEmpty()){
+            list.add(ConnectionList(addr))
+            epActor.send(
+                EPActorDto(
+                    Changes.BALANCE_ADD, null, addr
+                )
+            )
             println("New Server is connected with $addr")
 
         }else{
-            for (address in serversList){
+            for (address in list){
                 if (address.getAddr() == addr){
                     checker = true
                 }
             }
             if (!checker){
-                serversList.add(ConnectionList(addr))
+                list.add(ConnectionList(addr))
                 println("New Server is connected with $addr")
-                balancer.addServerToLoud(addr)
+                epActor.send(
+                    EPActorDto(
+                        Changes.BALANCE_ADD, null, addr
+                    )
+                )
             }
         }
     }
@@ -158,9 +171,14 @@ class EntryPoint : Channel(DatagramChannel.open()) {
     }
     private fun clientManager(request: Request, address: SocketAddress) =
         CoroutineScope(Job()).launch{
+            val list = epActor.getServers(
+                EPActorDto(
+                    Changes.GET_SERVERS, null
+                )
+            )
         if (request.message.message == "ping from client"){
             launch { successPing(address) }
-        }else if (serversList.isNotEmpty()){
+        }else if (list.isNotEmpty()){
             launch { checkClient(address) }
             if (checkCommits(request)) {
                 launch { sendRequestToServer(request, address) }
@@ -180,16 +198,8 @@ class EntryPoint : Channel(DatagramChannel.open()) {
             val comm = epActor.getCommits(EPActorDto(Changes.GET_COMMITS, null))
             if (request.type == Types.SYNC || comm.size > 20){
                 request.list = comm
-                println(comm)
                 request.type = Types.SYNC
                 epActor.send(EPActorDto(Changes.COMMITS_CLEAR, null))
-                println(comm.size)
-
-                println(request.list.size)
-                println(request.list)
-
-
-
 
                 request.message.commandList = listOf(
                     mapOf(
@@ -197,21 +207,36 @@ class EntryPoint : Channel(DatagramChannel.open()) {
                     )
                 ) as List<HashMap<String, String>>
                 val list = mutableListOf<String>()
-                for (server in serversList){
+                val ser = epActor.getServers(
+                    EPActorDto(
+                        Changes.GET_SERVERS, null
+                    )
+                )
+                for (server in ser){
                     list.add(server.getAddr().toString())
                 }
                 request.serversAddr = list
             }
-            val serverAddress = balancer.balance()
-            request.from = clientAddress.toString()
-            request.sender = serverAddress.toString()
-            launch { balancer increment serverAddress }
-
-            launch {
+            val serverAddress : SocketAddress
+            if (request.message.message == "success"){
+                serverAddress = clientAddress
+                request.from = clientAddress.toString()
+                request.sender = serverAddress.toString()
                 receiveChannel.send(request)
+            }else {
+                serverAddress = epActor.getServer(
+                    EPActorDto(
+                        Changes.BALANCE,
+                        null
+                    )
+                )
+                request.from = clientAddress.toString()
+                request.sender = serverAddress.toString()
+                launch {
+                    receiveChannel.send(request)
+                }
             }
-
-    }
+        }
     private suspend fun sendErrorRequestToClient(address : SocketAddress, message : String){
         val answer = Request(ePToken, address, ePAddr, 1, MessageDto(emptyList(), message))
         failedChannel.send(answer)
@@ -219,7 +244,14 @@ class EntryPoint : Channel(DatagramChannel.open()) {
     private suspend infix fun resendAnswerToClient(request: Request){
         this checkCommits request.list
         val serverAddress = request.getFrom()
-        balancer decrement serverAddress
+
+        epActor.send(
+            EPActorDto(
+                Changes.BALANCE_D,
+                null,
+                serverAddress
+            )
+        )
         sendChannel.send(request)
     }
     private infix fun successPing(addr: SocketAddress){

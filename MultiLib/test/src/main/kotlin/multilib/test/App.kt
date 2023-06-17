@@ -8,9 +8,9 @@ import java.time.LocalDateTime
 
 fun main() = runBlocking{
     val start : LocalDateTime = LocalDateTime.now()
-    repeat(100){
+    repeat(10){
         val client = createClient("log", "pas")
-        repeat(50){
+        repeat(10){
             client.sendMessage("add 4 4 4.0 4 4 4 4.0 STEPPE JUNTA 4 05/02/2004 ",
                 Types.NO_SYNC.toString())
             client.getMessage()

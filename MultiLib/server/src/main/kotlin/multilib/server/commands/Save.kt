@@ -44,6 +44,7 @@ class Save : Command {
             databaseManager.addCity(it)
         }
         uSender.print(MessageDto(emptyList(), "You can continue"), emptyList())
+        databaseManager.stop()
     }
 
     override fun setMapForClient(): HashMap<String, String> {

@@ -65,7 +65,7 @@ class Load : Command {
             cityCreator.create(owner, creationDate.atStartOfDay(), id, name, coordX, coordY, area, pop, meters, agl, climate, government, governorBirt, governorAge)
 
         }
-
+        databaseManger.stop()
         return Result("Загружено", true)
     }
 
