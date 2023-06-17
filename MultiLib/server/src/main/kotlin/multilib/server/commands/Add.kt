@@ -12,6 +12,7 @@ import multilib.server.commands.tools.VarsShaper
 import multilib.server.commands.tools.Result
 import multilib.lib.list.dto.CommitDto
 import multilib.lib.list.dto.Types
+import multilib.server.city.City
 import multilib.server.database.DatabaseManager
 import multilib.server.jwt.Body
 import multilib.server.jwt.Builder
@@ -60,41 +61,43 @@ object Var{
 
 
 class Add : Command {
+    private val builder = Builder()
     private val setMapForCommand = SetMapForCommand()
     private val shaper = VarsShaper()
     private val argsInfo = ArgsInfo()
+    val databaseManager = DatabaseManager()
+    val creator = CityCreator()
+    var nameCity : String? = null
+    var coordX : Long? = null
+    var coordY : Float? = null
+    var area : Int? = null
+    var population : Long? = null
+    var meters : Long? = null
+    var agl : Double? = null
+    var climate : String? = null
+    var government : String? = null
+    var birt : ZonedDateTime? = null
+    var localDate : LocalDateTime? = null
+    var id : Long? = null
+    var age : Int? = null
+
+    var owner : String? = null
+    var token : Body? = null
+    var pair : Pair<Int, String>? = null
+    lateinit var city : City
     override val type: Types
         get() = Types.NO_SYNC
 
     override val hidden: Boolean
         get() = true
     override suspend fun comply(variables: HashMap<String, Any>): Result {
-        val scope = CoroutineScope(Job())
-        val databaseManager = DatabaseManager()
         val list = mutableListOf<CommitDto>()
-        val creator = CityCreator()
-        var name : String? = null
-        var coordX : Long? = null
-        var coordY : Float? = null
-        var area : Int? = null
-        var population : Long? = null
-        var meters : Long? = null
-        var agl : Double? = null
-        var climate : String? = null
-        var government : String? = null
-        var birt : ZonedDateTime? = null
-        var localDate : LocalDateTime? = null
-        var id : Long? = null
-        var age : Int? = null
-
-        var owner : String
-        var token : Body
-        var pair : Pair<Int, String>? = null
+        val scope = CoroutineScope(Job())
         scope.launch{
             databaseManager.getConnectionToDataBase()
         }.join()
         scope.launch {
-            name = variables[Var.name].toString()
+            nameCity = variables[Var.name].toString()
             coordX = variables[Var.coordinateX].toString().toLong()
             coordY = variables[Var.coordinateY].toString().toFloat()
             area = variables[Var.area].toString().toInt()
@@ -104,11 +107,11 @@ class Add : Command {
             climate = variables[Var.climate].toString()
             government = variables[Var.government].toString()
             age = variables[Var.age].toString().toInt()
-        }
+        }.join()
         scope.launch {
             owner = uSender.getToken()
-            token = Builder().verify(owner)
-            pair = Pair(token.id, token.data["login"]!!)
+            token = builder.verify(owner!!)
+            pair = Pair(token!!.id, token!!.data["login"]!!)
         }.join()
             if(variables["id"] == null){
                 scope.launch {
@@ -118,6 +121,9 @@ class Add : Command {
                     localDate = LocalDateTime.now()
                     id = databaseManager.getFreeId("collection")!!.toLong()
                 }.join()
+                scope.launch {
+                    databaseManager.stop()
+                }
             }else{
                 scope.launch {
                     id = variables["id"]!!.toString().toLong()
@@ -128,8 +134,10 @@ class Add : Command {
         val birthday = ZonedDateTime.parse(birt.toString())
 
 
-        val commit = creator.create(pair!!, localDate!!, id.toString().toLong(), name!!, coordX!!, coordY!!,
+        val commit = creator.create(pair!!, localDate!!, id.toString().toLong(), nameCity!!, coordX!!, coordY!!,
             area!!, population!!, meters!!, agl!!, climate!!, government!!, birthday, age!!)
+
+        city = creator.my!!
         list.add(commit)
 
         return Result("Город добавлен в коллекцию", true, list)

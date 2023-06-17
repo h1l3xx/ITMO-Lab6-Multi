@@ -1,5 +1,5 @@
 package multilib.lib.list.dto
 
 enum class CommitType {
-    ADD, UPDATE, REMOVE
+    ADD, UPDATE, REMOVE, REMOVE_ALL
 }

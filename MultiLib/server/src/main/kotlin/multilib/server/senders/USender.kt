@@ -18,23 +18,21 @@ class USender : Sender {
     private var clientAddress : SocketAddress? = null
     private var clientToken : String? = null
     private var lastMessage : Request? = null
-    override fun print(message: MessageDto, list : List<CommitDto>) {
+    override suspend fun print(message: MessageDto, list : List<CommitDto>) {
         if (!stack){
 
             if (sendStack == ""){
                 channel = manager!!.getChannel()
                 addr = manager!!.getAddress()
                 val request = Request(clientToken!!, clientAddress!!, channel!!.localAddress!!, 1, message, list, null)
-                val answerServer = serializeRequest(request)
 
-                channel!!.send(ByteBuffer.wrap(answerServer.toByteArray()), addr)
+                manager!!.getServer().sendChannel.send(request)
                 this setLast request
             }else{
                 channel = manager!!.getChannel()
                 addr = manager!!.getAddress()
                 val request = Request(clientToken!!, clientAddress!!, channel!!.localAddress, 1, message, list, null)
-                val answerServer = serializeRequest(request)
-                channel!!.send(ByteBuffer.wrap(answerServer.toByteArray()), addr)
+                manager!!.getServer().sendChannel.send(request)
                 this setLast request
                 sendStack = ""
             }
@@ -63,10 +61,15 @@ class USender : Sender {
         channel!!.send(ByteBuffer.wrap(answerServer.toByteArray()), addr)
         this setLast request
     }
-
-    private fun serversInfo(info : String, serverAddress: SocketAddress){
-    }
     private infix fun setLast(request: Request){
         this.lastMessage = request
+    }
+
+    infix fun send(request: Request){
+        channel = manager!!.getChannel()
+        addr = manager!!.getAddress()
+        val ser = serializeRequest(request)
+        channel!!.send(ByteBuffer.wrap(ser.toByteArray()), addr)
+        this setLast request
     }
 }

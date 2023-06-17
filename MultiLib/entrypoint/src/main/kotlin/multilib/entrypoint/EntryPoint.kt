@@ -1,5 +1,9 @@
 package multilib.entrypoint
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.Channel as Ch
 import multilib.lib.list.*
 import multilib.lib.list.dto.CommitDto
 import multilib.lib.list.dto.MessageDto
@@ -11,10 +15,15 @@ import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
 
 class EntryPoint : Channel(DatagramChannel.open()) {
+    private val socketAddressInterpreter = SocketAddressInterpreter()
+    private var waiting = false
+    private val epActor = EntryPointActor()
     private var serversList = mutableListOf<ConnectionList>()
     private var clientList = mutableListOf<ConnectionList>()
-    private var commits = mutableListOf<CommitDto>()
+    var commits = mutableListOf<CommitDto>()
+    private val scope = CoroutineScope(Job())
     private var ePToken = ""
+    private var failedChannel : Ch<Request> = Ch(capacity = Ch.BUFFERED)
 
     var ePAddr : SocketAddress
     private val balancer = Balancer()
@@ -24,17 +33,50 @@ class EntryPoint : Channel(DatagramChannel.open()) {
         this.channel.bind(address)
         ePAddr = this.channel.localAddress
     }
-    fun start(){
+    fun start() = scope.launch{
         println("Entry Point is running.")
+        launch {
+            while (true) {
+                val buffer = ByteBuffer.allocate(65535)
+                val socketAddress: SocketAddress = channel.receive(buffer)
+                buffer.flip()
+                val bytes = ByteArray(buffer.remaining())
+                buffer.get(bytes)
+                val request = deserializeRequest(String(bytes))
+                operateRequest(request, socketAddress)
+                println(String(bytes))
+            }
+        }
+        launch {
+            sendToServer()
+        }
+        launch {
+            sendAnswerToClient()
+        }
+        launch { sendError() }
+    }
+    private suspend fun sendToServer(){
+        while (!waiting){
+            val request = receiveChannel.receive()
+            println(request)
+            if (request.serversAddr.isNotEmpty()){
+                send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), socketAddressInterpreter.interpret(request.sender))
+                waiting = true
+            }else{
+                send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), socketAddressInterpreter.interpret(request.sender))
+            }
+        }
+    }
+    private suspend fun sendError(){
         while (true){
-            val buffer = ByteBuffer.allocate(65535)
-            val socketAddress: SocketAddress = this.channel.receive(buffer)
-            buffer.flip()
-            val bytes = ByteArray(buffer.remaining())
-            buffer.get(bytes)
-            val request = deserializeRequest(String(bytes))
-            operateRequest(request, socketAddress)
-            println(String(bytes))
+            val request = failedChannel.receive()
+            send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), socketAddressInterpreter.interpret(request.sender))
+        }
+    }
+    private suspend fun sendAnswerToClient(){
+        while (true){
+            val request = sendChannel.receive()
+            send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), socketAddressInterpreter.interpret(request.sender))
         }
     }
 
@@ -75,90 +117,127 @@ class EntryPoint : Channel(DatagramChannel.open()) {
             }
         }
     }
-    private fun operateRequest(request: Request, addr : SocketAddress){
+    private fun operateRequest(request: Request, addr : SocketAddress) = CoroutineScope(scope.coroutineContext + Job()).launch{
         //Пришёл SocketAddress отправителя и его месага
-        if (this checkMess request){
-            serverManager(request, addr)
+        if (checkMess(request)){
+            launch { serverManager(request, addr) }
         }else{
-            clientManager(request, addr)
+            launch { clientManager(request, addr) }
         }
     }
     private infix fun checkMess(request: Request) : Boolean{
             return request.who == 1
     }
-    private fun serverManager(request: Request, address : SocketAddress){
-        this checkServer address //Добавили сервер в список (если его там не было).
-
+    private fun serverManager(request: Request, address : SocketAddress) = CoroutineScope(Job()).launch{
+        launch { checkServer(address) }
+        //Добавили сервер в список (если его там не было).
+        launch {
+            if (request.message.message == "You can continue"){
+                waiting = false
+                epActor.send(
+                    EPActorDto(
+                    Changes.COMMITS_CLEAR, null
+                )
+                )
+                launch {
+                    sendToServer()
+                }
+            }
+        }
         val message = request.message.message
         println(message)
         if (message.contains("try to connect")){
-            sendRequestToServer(Request(ePToken, ePAddr, ePAddr, 1, MessageDto(emptyList(), "success")), address)
+            launch { sendRequestToServer(Request(ePToken, address, ePAddr, 1, MessageDto(emptyList(), "success")), address) }
         }else{
-            this resendAnswerToClient request
+            launch {
+                if (request.message.message != "You can continue"){
+                    resendAnswerToClient(request)
+                }
+            }
         }
     }
-    private fun clientManager(request: Request, address: SocketAddress){
+    private fun clientManager(request: Request, address: SocketAddress) =
+        CoroutineScope(Job()).launch{
         if (request.message.message == "ping from client"){
-            this successPing address
+            launch { successPing(address) }
         }else if (serversList.isNotEmpty()){
-            this checkClient address
-            if (this checkCommits request) {
-                sendRequestToServer(request, address)
+            launch { checkClient(address) }
+            if (checkCommits(request)) {
+                launch { sendRequestToServer(request, address) }
             }else{
-                //val badReq = Request(ePToken, request.sender, request.from, 0, MessageDto(emptyList(), "Невозможное изменение. Посмотрите состояние коллекции."))
-                sendErrorRequestToClient(SocketAddressInterpreter().interpret(request.sender))
+                launch {
+                    val message = "Данное действие невозможно с указанным элементом, произошли изменения."
+                    sendErrorRequestToClient(SocketAddressInterpreter().interpret(request.sender), message)
+                }
             }
         }else{
-            this checkClient address
-            sendErrorRequestToClient(address)
+            launch { checkClient(address) }
+            launch { sendErrorRequestToClient(address, Var.errorServer) }
         }
     }
-    private fun sendRequestToServer(request: Request, clientAddress : SocketAddress){
-        if (request.type == Types.SYNC){
-            request.list = commits
-            commits = mutableListOf()
-            val list = mutableListOf<String>()
-            for (server in serversList){
-                list.add(server.getAddr().toString())
+    private suspend fun sendRequestToServer(request: Request, clientAddress : SocketAddress) =
+        CoroutineScope(Job()).launch{
+            val comm = epActor.getCommits(EPActorDto(Changes.GET_COMMITS, null))
+            if (request.type == Types.SYNC || comm.size > 20){
+                request.list = comm
+                println(comm)
+                request.type = Types.SYNC
+                epActor.send(EPActorDto(Changes.COMMITS_CLEAR, null))
+                println(comm.size)
+
+                println(request.list.size)
+                println(request.list)
+
+
+
+
+                request.message.commandList = listOf(
+                    mapOf(
+                        "last" to "last"
+                    )
+                ) as List<HashMap<String, String>>
+                val list = mutableListOf<String>()
+                for (server in serversList){
+                    list.add(server.getAddr().toString())
+                }
+                request.serversAddr = list
             }
-            request.serversAddr = list
-        }
-        val serverAddress = balancer.balance()
-        request.from = clientAddress.toString()
+            val serverAddress = balancer.balance()
+            request.from = clientAddress.toString()
+            request.sender = serverAddress.toString()
+            launch { balancer increment serverAddress }
 
-
-        balancer increment serverAddress
-        
-        send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), serverAddress)
+            launch {
+                receiveChannel.send(request)
+            }
 
     }
-    private fun sendErrorRequestToClient(address : SocketAddress){
-        val answer = Request(ePToken, ePAddr, ePAddr, 1, MessageDto(emptyList(), Var.errorServer))
-        send(ByteBuffer.wrap(serializeRequest(answer).toByteArray()), address)
+    private suspend fun sendErrorRequestToClient(address : SocketAddress, message : String){
+        val answer = Request(ePToken, address, ePAddr, 1, MessageDto(emptyList(), message))
+        failedChannel.send(answer)
     }
-    private infix fun resendAnswerToClient(request: Request){
+    private suspend infix fun resendAnswerToClient(request: Request){
         this checkCommits request.list
-        val clientAddress = request.getSender()
         val serverAddress = request.getFrom()
         balancer decrement serverAddress
-        println(commits)
-        send(ByteBuffer.wrap(serializeRequest(request).toByteArray()), clientAddress)
+        sendChannel.send(request)
     }
     private infix fun successPing(addr: SocketAddress){
         val answer = Request(ePToken, ePAddr, ePAddr, 1, MessageDto(emptyList(), "success"))
         send(ByteBuffer.wrap(serializeRequest(answer).toByteArray()), addr)
     }
-    private infix fun checkCommits(list : List<CommitDto>){
+    private suspend infix fun checkCommits(list : List<CommitDto>){
         if (list.isNotEmpty()){
             for (commit in list){
-                commits.add(commit)
+                epActor.send(EPActorDto(Changes.COMMITS_ADD, commit))
             }
         }
     }
 
-    private infix fun checkCommits(request : Request) : Boolean{
-        return if (commits.isNotEmpty() && this checkCommand request.message.message){
-            for (commit in commits){
+    private suspend infix fun checkCommits(request : Request) : Boolean{
+        val comm = epActor.getCommits(EPActorDto(Changes.GET_COMMITS, null))
+        return if (comm.isNotEmpty() && this checkCommand request.message.message){
+            for (commit in comm){
                 val el = request.message.message.split(" ")
                 if (commit.id == el[1].toInt() && commit.data.isNullOrEmpty()){
                     return false
@@ -166,7 +245,6 @@ class EntryPoint : Channel(DatagramChannel.open()) {
             }
             true
         }else{
-            println("I'm here")
             true
         }
     }

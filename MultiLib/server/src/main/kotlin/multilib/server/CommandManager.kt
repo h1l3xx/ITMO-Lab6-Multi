@@ -43,7 +43,7 @@ class CommandManager {
     fun getCommandDescriptionList(): HashMap<String, String> {
         return commandDescriptionList
     }
-    private fun checkArgumentsInfo(name: String, arguments : List<String>): Boolean {
+    private suspend  fun checkArgumentsInfo(name: String, arguments : List<String>): Boolean {
         val info = commandList[name]!!.argsInfo()
         val size = arguments.size
         if (size > info[Values.max]!! || size < info[Values.min]!!){

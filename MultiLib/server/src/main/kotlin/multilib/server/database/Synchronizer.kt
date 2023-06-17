@@ -8,7 +8,9 @@ import multilib.lib.list.SocketAddressInterpreter
 import multilib.lib.list.dto.Act
 import multilib.lib.list.dto.CommitDto
 import multilib.lib.list.dto.CommitType
+import multilib.lib.list.dto.MessageDto
 import multilib.server.city.City
+import multilib.server.city.CityCreator
 import multilib.server.collection
 import multilib.server.collectionActor
 import multilib.server.commands.Add
@@ -27,14 +29,16 @@ class Synchronizer {
             allId.add(city.getId()!!)
         }
         val cityUpdater = CityUpdater()
+        val cities = mutableListOf<City>()
         val updates = mutableListOf<Pair<City, CommitDto>>()
+        val removes = mutableListOf<Pair<City, CommitDto>>()
         val commits  = request.list
         commits.forEach {
             when (it.type){
                 CommitType.REMOVE -> {
                     for (city in cl){
                         if (city.getId()!! == it.id.toLong()){
-                            cl.remove(city)
+                            removes.add(Pair(city, it))
                         }
                     }
                 }
@@ -52,8 +56,12 @@ class Synchronizer {
                         }
                     }
                     if (!f){
-                        Add().comply(it.data as HashMap<String, Any>)
+                        val add = Add()
+                        add.comply(it.data as HashMap<String, Any>)
+                        cities.add(add.city)
                     }
+                }CommitType.REMOVE_ALL ->{
+                    collection.getCollection().clear()
                 }
             }
         }
@@ -63,24 +71,32 @@ class Synchronizer {
             }
         }
         launch {
-            collectionActor.actor.send(
-                ActorDto(
-                    Pair(Act.SAVE, collection.getCollection())
+            removes.forEach{
+                collectionActor.send(
+                    ActorDto(
+                        Pair(Act.REMOVE, mutableListOf(it.first))
+                    )
                 )
-            )
+            }
         }
-
-        resendToOtherServer(request)
+        collectionActor.send(
+            ActorDto(
+                Pair(Act.SAVE, cities)
+            )
+        )
+        launch { resendToOtherServer(request) }
     }
-    private infix fun resendToOtherServer(request: Request) {
+    private suspend infix fun resendToOtherServer(request: Request) {
         val socketAddressInterpreter = SocketAddressInterpreter()
+        println("Size is:")
+        println(request.list.size)
         val servers = request.serversAddr
         for (server in servers) {
             val addr = socketAddressInterpreter.interpret(server)
             if (addr != uSender.channel!!.localAddress) {
                 println(addr)
                 uSender setClient addr
-                uSender.print("let's synchronize!")
+                uSender.print(MessageDto(emptyList(), "let's synchronize!"), emptyList())
                 uSender setClient request.getFrom()
             }
         }

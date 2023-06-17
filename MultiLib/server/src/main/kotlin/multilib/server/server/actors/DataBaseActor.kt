@@ -14,7 +14,7 @@ import multilib.server.commands.tools.ActorDto
 class DataBaseActor {
     private val scope = CoroutineScope(Job())
     @OptIn(ObsoleteCoroutinesApi::class)
-    val actor = scope.actor<ActorDto>(capacity = Channel.BUFFERED) {
+    private val actor = scope.actor<ActorDto>(capacity = Channel.BUFFERED) {
         for (command in this) {
             when (command.data.first) {
                 Act.LOAD -> run{
@@ -35,7 +35,7 @@ class DataBaseActor {
     private suspend fun load(){
         Load().comply(HashMap())
     }
-    private fun save(list : MutableList<City>){
+    private suspend fun save(list : MutableList<City>){
         Save().comply(list)
     }
     suspend fun send(data : ActorDto): Any {

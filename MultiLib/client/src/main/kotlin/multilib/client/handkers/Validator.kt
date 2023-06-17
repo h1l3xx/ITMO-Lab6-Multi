@@ -57,7 +57,6 @@ class Validator {
         return true
     }
     fun validateOneArgument(argument : String, type : String) : Any{
-        println(argument)
         return when (type) {
             Var.str -> argument
             Var.long -> {

@@ -15,12 +15,10 @@ class CollectionActor {
     private val scope = CoroutineScope(Job())
 
     @OptIn(ObsoleteCoroutinesApi::class)
-    val actor = scope.actor<ActorDto>(capacity = Channel.BUFFERED){
+    private val actor = scope.actor<ActorDto>(capacity = Channel.BUFFERED){
         for (command in this){
             when (command.data.first){
                 Act.ADD -> run {
-                    println("I'm here")
-                    println(command.data.second.first())
                     collection.add(command.data.second.first())
                     command.response.complete(1)
                 }

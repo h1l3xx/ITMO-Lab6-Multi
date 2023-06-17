@@ -6,7 +6,7 @@ import java.net.SocketAddress
 class Balancer {
 
     private var workLoud : HashMap<SocketAddress, Int> = HashMap()
-    var minWork : Int = 100
+    var minWork : Int = 100000000
 
     fun balance() : SocketAddress{
         val serverAddress = takeMin()
@@ -17,7 +17,7 @@ class Balancer {
         workLoud[addr] = 0
     }
     private fun takeMin() : SocketAddress{
-        minWork = 100
+        minWork = 10000000
         var returnServer = entryPoint.ePAddr
         for (server in workLoud.keys){
             if (workLoud[server]!! < minWork){

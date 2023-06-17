@@ -18,7 +18,7 @@ var connectToEP = false
 
 class Client : Channel(DatagramChannel.open()){
 
-    private var token = ""
+    var token = ""
 
     private val entryPointAddress : SocketAddress = InetSocketAddress(Config.servAdr, Config.port)
     private val connect = Connect()

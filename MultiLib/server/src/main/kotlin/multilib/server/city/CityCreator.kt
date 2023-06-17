@@ -16,6 +16,7 @@ import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 class CityCreator {
+    var my : City? = null
     suspend fun create(owner : Pair<Int, String>, creationDate : LocalDateTime, id : Long, name : String, coordX : Long, coordY : Float, area: Int, population: Long, meters: Long, agl: Double, climate:String, government: String, birthday : ZonedDateTime, age : Int):
             CommitDto
     {
@@ -68,14 +69,15 @@ class CityCreator {
             map[Var.date] = creationDate.toString()
             map[Var.birthday] = birthday.toString()
         }.join()
-        println("ЗДЕСЬ")
-        println(city)
         scope.launch{
             collectionActor.send(
                 ActorDto(
                     Pair(Act.ADD, mutableListOf(city))
                 )
             )
+        }.join()
+        scope.launch {
+            my = city
         }.join()
         return CommitDto(CommitType.ADD ,map[Var.id]!!.toInt(), map, ZonedDateTime.now().toEpochSecond())
     }

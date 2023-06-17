@@ -72,6 +72,7 @@ class UpdServer : Channel(DatagramChannel.open()) {
     }
 
     fun run() = scope.launch {
+
         receiveData(this)
         launch{
                 channel.bind(null)
@@ -93,7 +94,21 @@ class UpdServer : Channel(DatagramChannel.open()) {
                 )
             )
         }
+        launch {
+            receiveToSend()
+        }
         connect(this).join()
+    }
+    private suspend fun receiveToSend(){
+        while (true){
+            try {
+                val request = sendChannel.receive()
+                uSender send request
+            }catch (e : Exception){
+                println("Some exception")
+                e.printStackTrace()
+            }
+        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -107,7 +122,7 @@ class UpdServer : Channel(DatagramChannel.open()) {
                 uSender setClientToken req.token
                 val message = req.message.message
                 if (req.token == "" && message != "commandList" && !message.contains("auth") && !message.contains("sign_up")){
-                    uSender.print("Вы не авторизованы")
+                    uSender.print(MessageDto(emptyList(), "Вы не авторизованы"), emptyList())
                 }else{
                     val commandAndArguments = req.message
                     if (checkForCommandList(commandAndArguments.message)){
@@ -124,7 +139,7 @@ class UpdServer : Channel(DatagramChannel.open()) {
         }
     }
     private fun setChannelAndSocket(socketAddress: SocketAddress, channel: DatagramChannel){
-        val manager = ChannelAndAddressManager(channel, socketAddress)
+        val manager = ChannelAndAddressManager(channel, socketAddress, this)
 
         uSender newManager manager
     }

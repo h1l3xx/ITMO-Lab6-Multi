@@ -11,6 +11,7 @@ import multilib.lib.list.dto.Types
 import multilib.server.city.City
 import multilib.server.collectionActor
 import multilib.server.commands.tools.ActorDto
+import multilib.server.database.DatabaseManager
 import multilib.server.jwt.Builder
 import multilib.server.uSender
 import java.time.ZonedDateTime
@@ -36,14 +37,23 @@ class Clear : Command {
                 arr.add(iterCity)
             }
         }
-        arr.forEach{
-            collectionActor.send(
-                ActorDto(
-                    Pair(Act.REMOVE, mutableListOf(it))
-                )
-            )
-        }
-        return Result("Коллекция очищена.", true, list)
+        val databaseManager = DatabaseManager()
+        databaseManager.getConnectionToDataBase()
+        databaseManager.clearTable("collection")
+        databaseManager.clearTable("governors")
+        databaseManager.clearTable("coordinates")
+        databaseManager.stop()
+        cityCollection.clear()
+       //arr.forEach{
+       //    collectionActor.send(
+       //        ActorDto(
+       //            Pair(Act.REMOVE, mutableListOf(it))
+       //        )
+       //    )
+       //}
+        return Result("Коллекция очищена.", true, mutableListOf<CommitDto>(
+            CommitDto(CommitType.REMOVE_ALL, 0, null, ZonedDateTime.now().toEpochSecond())
+        ))
     }
 
     override fun getName(): String {
