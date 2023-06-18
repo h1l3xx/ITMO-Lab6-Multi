@@ -1,5 +1,5 @@
 package multilib.lib.list.dto
 
 enum class Act {
-    REMOVE, ADD, UPDATE, LOAD, SAVE
+    REMOVE, ADD, UPDATE, LOAD, SAVE, GET_CITY
 }

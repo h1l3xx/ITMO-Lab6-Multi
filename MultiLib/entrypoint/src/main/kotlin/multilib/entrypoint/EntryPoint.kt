@@ -196,16 +196,11 @@ class EntryPoint : Channel(DatagramChannel.open()) {
     private suspend fun sendRequestToServer(request: Request, clientAddress : SocketAddress) =
         CoroutineScope(Job()).launch{
             val comm = epActor.getCommits(EPActorDto(Changes.GET_COMMITS, null))
-            if (request.type == Types.SYNC || comm.size > 20){
+            if (request.type == Types.SYNC || comm.size > 50){
                 request.list = comm
                 request.type = Types.SYNC
                 epActor.send(EPActorDto(Changes.COMMITS_CLEAR, null))
 
-                request.message.commandList = listOf(
-                    mapOf(
-                        "last" to "last"
-                    )
-                ) as List<HashMap<String, String>>
                 val list = mutableListOf<String>()
                 val ser = epActor.getServers(
                     EPActorDto(

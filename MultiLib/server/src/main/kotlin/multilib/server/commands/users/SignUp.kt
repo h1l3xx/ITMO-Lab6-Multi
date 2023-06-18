@@ -36,6 +36,7 @@ class SignUp : Command {
             databaseManager.registerUser(variables[Var.login].toString(), variables[Var.password].toString())
             returnLine = "Вы зарегистрированы"
         }
+        databaseManager.stop()
         return Result(returnLine, true)
     }
     override val hidden: Boolean

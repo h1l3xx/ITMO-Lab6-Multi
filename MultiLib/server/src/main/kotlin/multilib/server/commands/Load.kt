@@ -3,6 +3,7 @@ import multilib.server.city.CityCreator
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
 import multilib.lib.list.dto.Types
+import multilib.server.collection
 import multilib.server.database.DatabaseManager
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -66,6 +67,9 @@ class Load : Command {
 
         }
         databaseManger.stop()
+        println("загружено?")
+        println( collection.getCollection().size)
+
         return Result("Загружено", true)
     }
 

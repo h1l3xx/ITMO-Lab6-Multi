@@ -8,15 +8,15 @@ import java.time.LocalDateTime
 
 fun main() = runBlocking{
     val start : LocalDateTime = LocalDateTime.now()
-    repeat(10){
+    var counter = 0
+    repeat(50){
         val client = createClient("log", "pas")
-        repeat(10){
+        repeat(100){
             client.sendMessage("add 4 4 4.0 4 4 4 4.0 STEPPE JUNTA 4 05/02/2004 ",
                 Types.NO_SYNC.toString())
-            client.getMessage()
+            counter += 1
+            println( "Город номер: $counter ${client.getMessage().message.message}")
         }
-        client.sendMessage("info", Types.SYNC.toString())
-        println(client.getMessage().message.message)
     }
     println("Starting at $start")
     println("Finishing af ${LocalDateTime.now()}")
@@ -26,10 +26,4 @@ fun createClient(login : String, password : String) : Client {
     client.sendMessage("auth $login $password", Types.NO_SYNC.toString())
     client.getMessage()
     return client
-}
-fun sendAdd(client: Client){
-    client.sendMessage(
-        "add 4 4 4.0 4 4 4 4.0 STEPPE JUNTA 4 05/02/2004 ",
-        Types.NO_SYNC.toString()
-    )
 }

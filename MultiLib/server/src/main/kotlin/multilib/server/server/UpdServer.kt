@@ -121,7 +121,8 @@ class UpdServer : Channel(DatagramChannel.open()) {
                 uSender setClient address
                 uSender setClientToken req.token
                 val message = req.message.message
-                if (req.token == "" && message != "commandList" && !message.contains("auth") && !message.contains("sign_up")){
+                if (req.token == "" && message != "commandList" && !message.contains("auth") && !message.contains("sign_up")
+                    && message != "let's synchronize!"){
                     uSender.print(MessageDto(emptyList(), "Вы не авторизованы"), emptyList())
                 }else{
                     val commandAndArguments = req.message

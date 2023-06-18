@@ -1,14 +1,12 @@
 package multilib.server.commands
 
 
-import multilib.lib.list.dto.MessageDto
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
 import multilib.lib.list.dto.Types
 import multilib.server.city.City
 import multilib.server.collection
 import multilib.server.database.DatabaseManager
-import multilib.server.uSender
 
 
 class Save : Command {
@@ -35,16 +33,19 @@ class Save : Command {
         return Result("Коллекция сохранена в БД", true)
     }
 
-    suspend fun comply(list : MutableList<City>){
-        databaseManager.getConnectionToDataBase()
+    fun comply(list : MutableList<City>){
 
+        databaseManager.getConnectionToDataBase()
+        println("---------------------------------")
+        println("This is list")
+        println(list.size)
 
         list.forEach {
-            println(it)
+            println("Я добовляю в БД ${it.getId()}")
             databaseManager.addCity(it)
         }
-        uSender.print(MessageDto(emptyList(), "You can continue"), emptyList())
         databaseManager.stop()
+
     }
 
     override fun setMapForClient(): HashMap<String, String> {

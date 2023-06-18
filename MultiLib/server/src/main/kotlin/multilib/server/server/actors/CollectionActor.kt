@@ -30,6 +30,9 @@ class CollectionActor {
                     collection.add(command.data.second.first())
                     command.response.complete(3)
                 }
+                Act.GET_CITY -> run{
+
+                }
                 else -> run{
                     launch { databaseActor.send(command) }
                     launch { command.response.complete(4) }

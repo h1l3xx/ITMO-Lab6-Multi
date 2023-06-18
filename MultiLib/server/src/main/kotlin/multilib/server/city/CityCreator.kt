@@ -56,6 +56,7 @@ class CityCreator {
         scope.launch {
             map[Var.id] = id.toString()
             map[Var.login] = owner.second
+            map[Var.logId] = owner.first.toString()
             map[Var.name] = name
             map[Var.coordinateX] = coordX.toString()
             map[Var.coordinateY] = coordY.toString()
@@ -76,9 +77,15 @@ class CityCreator {
                 )
             )
         }.join()
-        scope.launch {
-            my = city
-        }.join()
+        println(city)
+        setCity(city)
         return CommitDto(CommitType.ADD ,map[Var.id]!!.toInt(), map, ZonedDateTime.now().toEpochSecond())
+    }
+
+    private fun setCity(city : City){
+        this.my = city
+    }
+    fun getCity() : City {
+        return this.my!!
     }
 }

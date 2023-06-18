@@ -10,7 +10,6 @@ import multilib.lib.list.dto.CommitDto
 import multilib.lib.list.dto.CommitType
 import multilib.lib.list.dto.MessageDto
 import multilib.server.city.City
-import multilib.server.city.CityCreator
 import multilib.server.collection
 import multilib.server.collectionActor
 import multilib.server.commands.Add
@@ -22,7 +21,9 @@ import kotlin.collections.HashMap
 
 @Suppress("UNCHECKED_CAST")
 class Synchronizer {
-    fun synchronize(request : Request) = CoroutineScope(Job()).launch{
+    fun synchronize(request : Request, bool : Boolean) = CoroutineScope(Job()).launch{
+        var b = bool
+        println(b)
         val cl = collection.getCollection()
         val allId = LinkedList<Long>()
         for (city in cl){
@@ -33,72 +34,114 @@ class Synchronizer {
         val updates = mutableListOf<Pair<City, CommitDto>>()
         val removes = mutableListOf<Pair<City, CommitDto>>()
         val commits  = request.list
-        commits.forEach {
-            when (it.type){
-                CommitType.REMOVE -> {
-                    for (city in cl){
-                        if (city.getId()!! == it.id.toLong()){
-                            removes.add(Pair(city, it))
+        if (commits.isNotEmpty()){
+            commits.forEach {
+                when (it.type) {
+                    CommitType.REMOVE -> {
+                        for (city in cl) {
+                            if (city.getId()!! == it.id.toLong()) {
+                                removes.add(Pair(city, it))
+                            }
                         }
+                    }
+
+                    CommitType.UPDATE -> {
+                        for (city in cl) {
+                            if (city.getId()!! == it.id.toLong()) {
+                                updates.add(Pair(city, it))
+                            }
+                        }
+                    }
+
+                    CommitType.ADD -> {
+                        var f = false
+                        for (id in allId) {
+                            if (id == it.id.toLong()) {
+                                f = true
+                            }
+
+                        }
+                        if (!f) {
+                            val add = Add()
+                            val city = add.comply(it.data as HashMap<String, Any>).city!!
+                            println("city: $city")
+                            cities.add(city)
+                        }
+                    }
+                    CommitType.REMOVE_ALL -> {
+                        cl.clear()
                     }
                 }
-                CommitType.UPDATE ->{
-                    for (city in cl){
-                        if (city.getId()!! == it.id.toLong()){
-                            updates.add(Pair(city, it))
-                        }
-                    }
-                }CommitType.ADD ->{
-                    var f = false
-                    for (id in allId){
-                        if (id == it.id.toLong()){
-                            f = true
-                        }
-                    }
-                    if (!f){
-                        val add = Add()
-                        add.comply(it.data as HashMap<String, Any>)
-                        cities.add(add.city)
-                    }
-                }CommitType.REMOVE_ALL ->{
-                    collection.getCollection().clear()
-                }
             }
-        }
-        launch {
-            updates.forEach{
-                cityUpdater.updateCity(it.first, it.second.data!!)
-            }
-        }
-        launch {
-            removes.forEach{
+            println("THIS IS CITIES")
+            println(cities)
+            if (cities.size != 0){
                 collectionActor.send(
                     ActorDto(
-                        Pair(Act.REMOVE, mutableListOf(it.first))
+                        Pair(
+                            Act.SAVE, cities
+                        )
                     )
                 )
             }
+            println(collection.getCollection().size)
+            launch {
+                updates.forEach{
+                    cityUpdater.updateCity(it.first, it.second.data!!)
+                }
+            }
+            launch {
+                removes.forEach{
+                    collectionActor.send(
+                        ActorDto(
+                            Pair(Act.REMOVE, mutableListOf(it.first))
+                        )
+                    )
+                }
+            }
+            println(cl.size)
+
+        }else{
+            b = false
         }
-        collectionActor.send(
-            ActorDto(
-                Pair(Act.SAVE, cities)
-            )
-        )
-        launch { resendToOtherServer(request) }
+        if (b){
+            resendToOtherServer(request)
+        }else{
+            uSender.print(MessageDto(emptyList(), "You can continue"), emptyList())
+        }
     }
     private suspend infix fun resendToOtherServer(request: Request) {
         val socketAddressInterpreter = SocketAddressInterpreter()
-        println("Size is:")
-        println(request.list.size)
         val servers = request.serversAddr
-        for (server in servers) {
-            val addr = socketAddressInterpreter.interpret(server)
-            if (addr != uSender.channel!!.localAddress) {
-                println(addr)
-                uSender setClient addr
-                uSender.print(MessageDto(emptyList(), "let's synchronize!"), emptyList())
-                uSender setClient request.getFrom()
+        if (servers.size != 1) {
+            for (server in servers) {
+                val addr = socketAddressInterpreter.interpret(server)
+                if (addr != uSender.channel!!.localAddress) {
+                    println(addr)
+                    uSender setClient addr
+                    uSender.print(MessageDto(emptyList(), "let's synchronize!"), request.list)
+                    uSender setClient request.getFrom()
+                }
             }
+        }else{
+            val commits = request.list
+            val cities = mutableListOf<City>()
+            val cl = collection.getCollection()
+            commits.forEach {
+                for (city in cl){
+                    if (it.id.toLong() == city.getId()){
+                        cities.add(city)
+                    }
+                }
+            }
+            collectionActor.send(
+                ActorDto(
+                    Pair(
+                        Act.SAVE,
+                        cities
+                    )
+                )
+            )
         }
     }
 }

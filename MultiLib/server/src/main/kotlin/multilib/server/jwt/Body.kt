@@ -5,7 +5,7 @@ import java.util.*
 
 @Serializable
 class Body(
-    val id: Int, val data: Map<String, String> = mapOf(),
+    var id: Int, val data: Map<String, String> = mapOf(),
     val expDate: Date = Date()
     ){
     companion object{

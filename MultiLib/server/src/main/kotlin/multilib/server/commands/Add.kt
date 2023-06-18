@@ -26,6 +26,7 @@ import kotlin.Long
 
 
 object Var{
+    const val logId = "loginId"
     const val date = "date"
     const val type = "type"
     const val login = "login"
@@ -110,7 +111,15 @@ class Add : Command {
         }.join()
         scope.launch {
             owner = uSender.getToken()
-            token = builder.verify(owner!!)
+            token = try {
+                builder.verify(owner!!)
+            }catch (e : Exception){
+                val loginMap = mapOf(
+                    "login" to  variables[Var.login].toString()
+                )
+                Body(variables[Var.logId]!!.toString().toInt(), loginMap)
+            }
+
             pair = Pair(token!!.id, token!!.data["login"]!!)
         }.join()
             if(variables["id"] == null){
@@ -130,6 +139,9 @@ class Add : Command {
                     birt = ZonedDateTime.parse(variables[Var.birthday].toString())
                     localDate = LocalDateTime.parse(variables[Var.date].toString())
                 }.join()
+                scope.launch {
+                    databaseManager.stop()
+                }
             }
         val birthday = ZonedDateTime.parse(birt.toString())
 
@@ -137,10 +149,11 @@ class Add : Command {
         val commit = creator.create(pair!!, localDate!!, id.toString().toLong(), nameCity!!, coordX!!, coordY!!,
             area!!, population!!, meters!!, agl!!, climate!!, government!!, birthday, age!!)
 
-        city = creator.my!!
+        city = creator.getCity()
         list.add(commit)
+        println("Я добовляю в коллекцию ${city.getId()}")
 
-        return Result("Город добавлен в коллекцию", true, list)
+        return Result("Город добавлен в коллекцию", true, list, city)
     }
 
     override fun getName(): String {

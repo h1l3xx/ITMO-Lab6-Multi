@@ -40,6 +40,7 @@ class Authorization : Command {
                 break
             }
         }
+        databaseManager.stop()
 
         return Result(returnLine, true)
     }

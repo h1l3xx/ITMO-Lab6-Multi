@@ -1,6 +1,6 @@
 package multilib.server.database
 
-import multilib.lib.list.Config
+
 import java.sql.Timestamp
 import multilib.server.city.City
 import java.math.BigInteger
@@ -42,7 +42,8 @@ class DatabaseManager {
         }
         try {
             connection = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5435/postgres", "postgres", "mysecretpassword")
+                "jdbc:postgresql://192.168.31.83:5435/postgres", "postgres", "mysecretpassword")
+//                "jdbc:postgresql://${Config.servAdr}:5435/postgres", "postgres", "mysecretpassword")
         } catch (e: SQLException) {
             println("Нет подключения к Базе")
             e.printStackTrace()

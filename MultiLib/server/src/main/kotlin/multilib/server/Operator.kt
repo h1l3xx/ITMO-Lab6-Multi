@@ -5,14 +5,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import multilib.lib.list.Request
-import multilib.lib.list.dto.Act
 import multilib.server.commands.ExecuteScript
 import multilib.lib.list.dto.MessageDto
 import multilib.lib.list.dto.Types
-import multilib.server.collection
-import multilib.server.collectionActor
 import multilib.server.commandManager
-import multilib.server.commands.tools.ActorDto
 import multilib.server.database.Synchronizer
 import multilib.server.uSender
 import java.util.*
@@ -28,19 +24,26 @@ class Operator {
                 runCommand(request.message.message)
             }
         }
+        else if (request.list.isEmpty()){
+            launch {
+                uSender.print(MessageDto(emptyList(), "You can continue"), emptyList())
+                runCommand(request.message.message)
+            }
+        }
         else if (request.message.message == "let's synchronize!"){
             launch {
-                collectionActor.send(
-                    ActorDto(
-                        Pair(Act.LOAD, mutableListOf())
-                    )
-                )
-                println(collection.getCollection().toString())
+                if (request.list.isNotEmpty()){
+                    synchronizer.synchronize(request, false).join()
+                }
             }
         }else{
             launch {
-                synchronizer.synchronize(request)
-                runCommand(request.message.message)
+                if (request.list.isNotEmpty()){
+                    synchronizer.synchronize(request, true).join()
+                    runCommand(request.message.message)
+                }else{
+                    runCommand(request.message.message)
+                }
             }
         }
     }
