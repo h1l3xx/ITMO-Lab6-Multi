@@ -5,10 +5,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import multilib.lib.list.Request
+import multilib.lib.list.dto.CommitDto
 import multilib.server.commands.ExecuteScript
 import multilib.lib.list.dto.MessageDto
 import multilib.lib.list.dto.Types
 import multilib.server.commandManager
+import multilib.server.commands.Command
 import multilib.server.database.Synchronizer
 import multilib.server.uSender
 import java.util.*
@@ -18,6 +20,7 @@ var sc = Scanner(System.`in`)
 class Operator {
     private val synchronizer = Synchronizer()
     private val scope = CoroutineScope(Job())
+
     fun checkSync(request : Request) = scope.launch{
         if (request.type != null && request.type != Types.SYNC && request.message.message != "let's synchronize!"){
             launch {
@@ -33,13 +36,13 @@ class Operator {
         else if (request.message.message == "let's synchronize!"){
             launch {
                 if (request.list.isNotEmpty()){
-                    synchronizer.synchronize(request, false).join()
+                    synchronizer.synchronize(request, false)
                 }
             }
         }else{
             launch {
                 if (request.list.isNotEmpty()){
-                    synchronizer.synchronize(request, true).join()
+                    synchronizer.synchronize(request, true)
                     runCommand(request.message.message)
                 }else{
                     runCommand(request.message.message)

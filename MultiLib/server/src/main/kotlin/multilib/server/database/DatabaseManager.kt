@@ -42,7 +42,7 @@ class DatabaseManager {
         }
         try {
             connection = DriverManager.getConnection(
-                "jdbc:postgresql://192.168.31.83:5435/postgres", "postgres", "mysecretpassword")
+                "jdbc:postgresql://172.28.26.66:5435/postgres", "postgres", "mysecretpassword")
 //                "jdbc:postgresql://${Config.servAdr}:5435/postgres", "postgres", "mysecretpassword")
         } catch (e: SQLException) {
             println("Нет подключения к Базе")

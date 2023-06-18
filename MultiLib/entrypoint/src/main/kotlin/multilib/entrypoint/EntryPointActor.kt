@@ -44,6 +44,13 @@ class EntryPointActor {
                     entryPoint.balancer.decrement(change.addr!!)
                     change.response.complete(1)
                 }
+                Changes.LOST -> {
+                    entryPoint.lost.add(change.data!!)
+                    change.response.complete(2)
+                }
+                Changes.GET_LOST -> {
+                    change.response.complete(entryPoint.lost)
+                }
             }
         }
     }
@@ -58,6 +65,10 @@ class EntryPointActor {
     suspend fun getServers(data : EPActorDto): MutableList<ConnectionList>{
         actor.send(data)
         return  data.response.await() as MutableList<ConnectionList>
+    }
+    suspend fun getLost(data : EPActorDto): MutableList<CommitDto>{
+        actor.send(data)
+        return data.response.await() as MutableList<CommitDto>
     }
     suspend fun getServer(data : EPActorDto) : SocketAddress{
         actor.send(data)

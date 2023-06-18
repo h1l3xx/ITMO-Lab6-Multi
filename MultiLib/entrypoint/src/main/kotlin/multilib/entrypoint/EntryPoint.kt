@@ -24,6 +24,7 @@ class EntryPoint : Channel(DatagramChannel.open()) {
     private val scope = CoroutineScope(Job())
     private var ePToken = ""
     private var failedChannel : Ch<Request> = Ch(capacity = Ch.BUFFERED)
+    val lost = mutableListOf<CommitDto>()
 
     var ePAddr : SocketAddress
     val balancer = Balancer()
@@ -155,6 +156,17 @@ class EntryPoint : Channel(DatagramChannel.open()) {
                 launch {
                     sendToServer()
                 }
+            }else if (waiting){
+                if (request.list.isNotEmpty()){
+                    println("-1-1--1-1-1-1-1-1-1-1--1-1-1-1-1-1-1-1-")
+                    println(request.list.first())
+                    epActor.send(
+                        EPActorDto(
+                            Changes.LOST,
+                            request.list.first()
+                        )
+                    )
+                }
             }
         }
         val message = request.message.message
@@ -196,8 +208,9 @@ class EntryPoint : Channel(DatagramChannel.open()) {
     private suspend fun sendRequestToServer(request: Request, clientAddress : SocketAddress) =
         CoroutineScope(Job()).launch{
             val comm = epActor.getCommits(EPActorDto(Changes.GET_COMMITS, null))
+            val lost = epActor.getLost(EPActorDto(Changes.GET_LOST, null))
             if (request.type == Types.SYNC || comm.size > 50){
-                request.list = comm
+                request.list = comm + lost
                 request.type = Types.SYNC
                 epActor.send(EPActorDto(Changes.COMMITS_CLEAR, null))
 
