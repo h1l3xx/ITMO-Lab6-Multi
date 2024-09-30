@@ -1,5 +1,8 @@
 package multilib.app
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import multilib.server.commands.Command
 import multilib.server.commands.tools.Values
 import multilib.lib.list.dto.MessageDto
@@ -15,7 +18,7 @@ class CommandManager {
 
     private var commandDescriptionList   : HashMap<String, String> = HashMap()
 
-    fun manage(name : String, arguments : List<String>){
+    fun manage(name : String, arguments : List<String>) = CoroutineScope(Job()).launch{
         if (checkArgumentsInfo(name, arguments)){
             val variables = commandList[name]!!.argContract(arguments)
             val result = commandList[name]!!.comply(variables)
@@ -40,7 +43,7 @@ class CommandManager {
     fun getCommandDescriptionList(): HashMap<String, String> {
         return commandDescriptionList
     }
-    private fun checkArgumentsInfo(name: String, arguments : List<String>): Boolean {
+    private suspend  fun checkArgumentsInfo(name: String, arguments : List<String>): Boolean {
         val info = commandList[name]!!.argsInfo()
         val size = arguments.size
         if (size > info[Values.max]!! || size < info[Values.min]!!){

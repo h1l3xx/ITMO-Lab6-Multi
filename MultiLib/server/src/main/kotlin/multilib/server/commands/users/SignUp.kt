@@ -18,7 +18,7 @@ class SignUp : Command {
         return setMapForCommand.setMapForCommand(2,2,false, SignUp(), Var.str + "; " + Var.str)
     }
 
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
 
         var returnLine = "Вы зарегистрированы."
         var error = false
@@ -36,6 +36,7 @@ class SignUp : Command {
             databaseManager.registerUser(variables[Var.login].toString(), variables[Var.password].toString())
             returnLine = "Вы зарегистрированы"
         }
+        databaseManager.stop()
         return Result(returnLine, true)
     }
     override val hidden: Boolean

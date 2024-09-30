@@ -13,10 +13,10 @@ import java.net.SocketAddress
 
 @Serializable
 data class Request(
-    val token : String,
-    val sender : String,
+    var token : String,
+    var sender : String,
     var from : String,
-    val who : Int,
+    var who : Int,
     val message : MessageDto,
     var list : List<CommitDto>,
     var type : Types?,

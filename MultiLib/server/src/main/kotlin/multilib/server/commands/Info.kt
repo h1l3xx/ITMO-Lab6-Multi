@@ -1,6 +1,7 @@
 package multilib.server.commands
 
 
+import multilib.lib.list.dto.MessageDto
 import multilib.server.collection
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
@@ -18,11 +19,12 @@ class Info : Command {
 
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend  fun comply(variables: HashMap<String, Any>): Result {
 
         val collectionInfo = collection.getCollection()
 
-        uSender.print ( "Дата инициализации: " + collection.getCreationTime().toString() +"; Количество элементов: " +  collectionInfo.size)
+        val message = "Дата инициализации: " + collection.getCreationTime().toString() +"; Количество элементов: " +  collectionInfo.size
+        uSender.print(MessageDto(emptyList(), message), emptyList())
 
         return Result("Команда выполнена успешно.", false)
     }

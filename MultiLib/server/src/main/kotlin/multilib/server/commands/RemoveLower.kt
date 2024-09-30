@@ -1,9 +1,12 @@
 package multilib.app.commands
 
+import multilib.lib.list.dto.Act
 import multilib.server.collection
 import multilib.lib.list.dto.CommitDto
 import multilib.lib.list.dto.CommitType
 import multilib.lib.list.dto.Types
+import multilib.server.city.City
+import multilib.server.collectionActor
 import multilib.server.commands.Command
 import multilib.server.commands.Var
 import multilib.server.commands.tools.*
@@ -25,10 +28,11 @@ class RemoveLower : Command {
     private val checkField = CheckField()
     private val checkArg = CheckArg()
     private val setMapForCommand = SetMapForCommand()
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
 
         val field = variables[Str.field].toString()
         val arg = variables[Str.arg].toString()
+        val arr = mutableListOf<City>()
         val commits = mutableListOf<CommitDto>()
         val iterator = collection.getCollection().iterator()
         while (iterator.hasNext()) {
@@ -36,8 +40,15 @@ class RemoveLower : Command {
             val token = Builder().verify(uSender.getToken()).data["login"]!!
             if (checkField.removeLower(iterCity, field, arg) == Action.remove && iterCity.getOwner().second == token) {
                 commits.add(CommitDto(CommitType.REMOVE, iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
-                iterator.remove()
+                arr.add(iterCity)
             }
+        }
+        arr.forEach {
+            collectionActor.send(
+                ActorDto(
+                    Pair(Act.REMOVE, mutableListOf(it))
+                )
+            )
         }
 
         return Result("Города, у которых значение указанного поля меньше - удалены.", true)

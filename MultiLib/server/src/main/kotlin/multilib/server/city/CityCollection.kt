@@ -4,7 +4,6 @@ package multilib.server.city
 import java.time.LocalDateTime
 import java.util.*
 
-var arrayFreeId = emptyArray<Long>()
 
 
 class CityCollection {
@@ -14,9 +13,11 @@ class CityCollection {
     fun getCollection() : LinkedList<City>{
         return collection
     }
+    fun remove(city: City){
+        collection.remove(city)
+    }
     fun add(city : City) {
         collection.add(city)
     }
-
     fun getCreationTime(): LocalDateTime? = creationTime
 }

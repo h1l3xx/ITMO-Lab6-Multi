@@ -8,5 +8,5 @@
  */
 
 rootProject.name = "MultiLib"
-include("server", "client", "lib")
+include("server", "client", "lib", "test")
 include("entrypoint")

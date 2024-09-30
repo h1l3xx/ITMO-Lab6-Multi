@@ -20,7 +20,7 @@ class RemoveAt : Command {
     private val argsInfo = ArgsInfo()
     private val checkArg = CheckArg()
     private val setMapForCommand = SetMapForCommand()
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
         val message : String
         val list = mutableListOf<CommitDto>()
         val argument = variables[Var.index].toString().toInt()

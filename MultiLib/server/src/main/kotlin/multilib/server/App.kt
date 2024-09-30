@@ -3,6 +3,9 @@
  */
 package multilib.server
 
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import multilib.app.CommandManager
 import multilib.app.Operator
 import multilib.server.city.CityCollection
@@ -13,20 +16,28 @@ import multilib.server.commands.Long
 import multilib.server.commands.users.Authorization
 import multilib.server.commands.users.SignUp
 import multilib.server.server.UpdServer
+import multilib.server.server.actors.CollectionActor
+import multilib.server.server.actors.DataBaseActor
 
 
 val collection = CityCollection()
 val operator = Operator()
 val commandManager = CommandManager()
 val uSender = USender()
+val collectionActor = CollectionActor()
+val databaseActor = DataBaseActor()
 
 
-fun main(){
+fun main() : Unit = runBlocking{
     commandManager.register(
         Add(), Clear(), ExecuteScript(), Exit(), FilterContainsName(), Help(), Info(),
         PrintAscending(), RemoveAllByMetersAboveSeaLevel(), RemoveAt(), RemoveById(), RemoveLower(), Show(), Sort(), UpdateById(), Long(),
         Authorization(), SignUp()
     )
-    UpdServer().run()
+    coroutineScope {
+        launch {
+            UpdServer().run().join()
+        }
+    }
 }
 

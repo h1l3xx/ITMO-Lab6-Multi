@@ -21,7 +21,7 @@ class ExecuteScript: Command {
 
     private val setMapForCommand = SetMapForCommand()
     private val argsInfo = ArgsInfo()
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend  fun comply(variables: HashMap<String, Any>): Result {
         stack = true
         try {
             for (i in 0 until variables.size){

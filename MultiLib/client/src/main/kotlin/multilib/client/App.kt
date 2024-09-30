@@ -5,5 +5,4 @@ var manager = Manager()
 fun main() {
 
     manager.process()
-
 }

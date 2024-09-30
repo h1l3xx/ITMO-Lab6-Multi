@@ -18,7 +18,7 @@ class Show : Command {
         get() = true
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
 
         val collection = collection.getCollection()
         var sendValue = ""

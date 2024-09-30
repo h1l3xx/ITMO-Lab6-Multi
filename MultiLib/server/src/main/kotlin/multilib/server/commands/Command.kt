@@ -8,7 +8,7 @@ interface Command {
     val type : Types
 
     val hidden : Boolean
-    fun comply(variables: HashMap<String, Any>): Result
+    suspend fun comply(variables: HashMap<String, Any>): Result
     fun getDescription(): String
     fun getName(): String
     fun argContract(arguments : List<String>): HashMap<String, Any>

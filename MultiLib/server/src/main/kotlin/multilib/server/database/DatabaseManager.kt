@@ -1,5 +1,6 @@
 package multilib.server.database
 
+
 import java.sql.Timestamp
 import multilib.server.city.City
 import java.math.BigInteger
@@ -41,11 +42,15 @@ class DatabaseManager {
         }
         try {
             connection = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5435/postgres", "postgres", "mysecretpassword")
+                "jdbc:postgresql://172.28.26.66:5435/postgres", "postgres", "mysecretpassword")
+//                "jdbc:postgresql://${Config.servAdr}:5435/postgres", "postgres", "mysecretpassword")
         } catch (e: SQLException) {
             println("Нет подключения к Базе")
             e.printStackTrace()
         }
+    }
+    fun stop(){
+        connection.close()
     }
     fun registerUser(login: String, password: String) {
         sql = "INSERT INTO users VALUES(?, ?, ?)"
@@ -101,7 +106,6 @@ class DatabaseManager {
         } catch (e: SQLException) {
 
           println("Some Error")
-            e.printStackTrace()
         }
         preparedStatement.close()
     }
@@ -122,7 +126,7 @@ class DatabaseManager {
 
             preparedStatement.executeUpdate()
         }catch (e: SQLException) {
-            e.printStackTrace()
+           println("attention")
         }
         preparedStatement.close()
     }
@@ -139,7 +143,7 @@ class DatabaseManager {
 
             preparedStatement.executeUpdate()
         }catch (e: SQLException) {
-            e.printStackTrace()
+            println("attention")
         }
         preparedStatement.close()
 
@@ -158,7 +162,6 @@ class DatabaseManager {
             }
             returnLine
         }catch (e : SQLException){
-            e.printStackTrace()
             "-1"
         }
     }

@@ -53,12 +53,9 @@ class Manager {
         this goPingEP client
         while (running){
 
-            val command = scanner.readLine()
+            val command = scanner.readLine() ?: continue
 
-            if (command == null)
-                continue;
-
-            val commandAndArguments = command!!.split(" ")
+            val commandAndArguments = command.split(" ")
             val name = commandAndArguments[0]
             var arguments = commandAndArguments.drop(1)
 

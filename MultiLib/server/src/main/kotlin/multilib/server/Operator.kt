@@ -1,35 +1,56 @@
 package multilib.app
 
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import multilib.lib.list.Request
+import multilib.lib.list.dto.CommitDto
 import multilib.server.commands.ExecuteScript
 import multilib.lib.list.dto.MessageDto
 import multilib.lib.list.dto.Types
 import multilib.server.commandManager
-import multilib.server.commands.Load
+import multilib.server.commands.Command
 import multilib.server.database.Synchronizer
 import multilib.server.uSender
 import java.util.*
-import kotlin.collections.HashMap
 
 
 var sc = Scanner(System.`in`)
 class Operator {
     private val synchronizer = Synchronizer()
+    private val scope = CoroutineScope(Job())
 
-    fun checkSync(request : Request){
-        println(request)
+    fun checkSync(request : Request) = scope.launch{
         if (request.type != null && request.type != Types.SYNC && request.message.message != "let's synchronize!"){
-            runCommand(request.message.message)
+            launch {
+                runCommand(request.message.message)
+            }
+        }
+        else if (request.list.isEmpty()){
+            launch {
+                uSender.print(MessageDto(emptyList(), "You can continue"), emptyList())
+                runCommand(request.message.message)
+            }
         }
         else if (request.message.message == "let's synchronize!"){
-            Load().comply(HashMap())
+            launch {
+                if (request.list.isNotEmpty()){
+                    synchronizer.synchronize(request, false)
+                }
+            }
         }else{
-            synchronizer.synchronize(request)
-            runCommand(request.message.message)
+            launch {
+                if (request.list.isNotEmpty()){
+                    synchronizer.synchronize(request, true)
+                    runCommand(request.message.message)
+                }else{
+                    runCommand(request.message.message)
+                }
+            }
         }
     }
-    fun runCommand(command: String){
+    fun runCommand(command: String) = CoroutineScope(scope.coroutineContext + Job()).launch{
         if (command.contains(ExecuteScript().getName())){
             val exAndCom = command.split(", ")
             val com = exAndCom.drop(1)
@@ -51,12 +72,18 @@ class Operator {
                         }
                         argumentsWithoutLast = addArg
                     }
-                    commandManager.manage(name, argumentsWithoutLast)
+                    launch {
+                        commandManager.manage(name, argumentsWithoutLast)
+                    }
                 } else {
-                    commandManager.manage(name, arguments)
+                    launch {
+                        commandManager.manage(name, arguments)
+                    }
                 }
             } else {
-                uSender.print(MessageDto(emptyList(), Messages.MESSAGE), emptyList())
+                launch {
+                    uSender.print(MessageDto(emptyList(), Messages.MESSAGE), emptyList())
+                }
             }
         }
     }

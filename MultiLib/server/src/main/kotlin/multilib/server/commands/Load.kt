@@ -3,6 +3,7 @@ import multilib.server.city.CityCreator
 import multilib.server.commands.tools.ArgsInfo
 import multilib.server.commands.tools.Result
 import multilib.lib.list.dto.Types
+import multilib.server.collection
 import multilib.server.database.DatabaseManager
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -20,7 +21,9 @@ class Load : Command {
     override val type: Types
         get() = Types.NO_SYNC
 
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
+
+
 
         val cityCreator = CityCreator()
 
@@ -63,6 +66,9 @@ class Load : Command {
             cityCreator.create(owner, creationDate.atStartOfDay(), id, name, coordX, coordY, area, pop, meters, agl, climate, government, governorBirt, governorAge)
 
         }
+        databaseManger.stop()
+        println("загружено?")
+        println( collection.getCollection().size)
 
         return Result("Загружено", true)
     }

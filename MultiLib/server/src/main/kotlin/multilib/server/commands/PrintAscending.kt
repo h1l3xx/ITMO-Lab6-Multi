@@ -17,7 +17,7 @@ class PrintAscending : Command {
     private val sort = Sort()
     private val show = Show()
     private val setMapForCommand = SetMapForCommand()
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
 
         sort.comply(HashMap())
         show.comply(HashMap())

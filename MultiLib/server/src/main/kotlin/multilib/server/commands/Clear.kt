@@ -1,5 +1,6 @@
 package multilib.server.commands
 
+import multilib.lib.list.dto.Act
 import multilib.server.commands.tools.Result
 import multilib.server.collection
 import multilib.server.commands.tools.ArgsInfo
@@ -7,6 +8,10 @@ import multilib.server.commands.tools.SetMapForCommand
 import multilib.lib.list.dto.CommitDto
 import multilib.lib.list.dto.CommitType
 import multilib.lib.list.dto.Types
+import multilib.server.city.City
+import multilib.server.collectionActor
+import multilib.server.commands.tools.ActorDto
+import multilib.server.database.DatabaseManager
 import multilib.server.jwt.Builder
 import multilib.server.uSender
 import java.time.ZonedDateTime
@@ -19,8 +24,9 @@ class Clear : Command {
 
     private val argsInfo = ArgsInfo()
     private val setMapForCommand = SetMapForCommand()
-    override fun comply(variables: HashMap<String, Any>): Result {
+    override suspend fun comply(variables: HashMap<String, Any>): Result {
         val list = mutableListOf<CommitDto>()
+        val arr = mutableListOf<City>()
         val cityCollection = collection.getCollection()
         val iterator = cityCollection.iterator()
         while (iterator.hasNext()) {
@@ -28,10 +34,26 @@ class Clear : Command {
             val token = Builder().verify(uSender.getToken()).data["login"]!!
             if (iterCity.getOwner().second == token) {
                 list.add(CommitDto(CommitType.REMOVE, iterCity.getId()!!.toInt(), null, ZonedDateTime.now().toEpochSecond()))
-                iterator.remove()
+                arr.add(iterCity)
             }
         }
-        return Result("Коллекция очищена.", true, list)
+        val databaseManager = DatabaseManager()
+        databaseManager.getConnectionToDataBase()
+        databaseManager.clearTable("collection")
+        databaseManager.clearTable("governors")
+        databaseManager.clearTable("coordinates")
+        databaseManager.stop()
+        cityCollection.clear()
+       //arr.forEach{
+       //    collectionActor.send(
+       //        ActorDto(
+       //            Pair(Act.REMOVE, mutableListOf(it))
+       //        )
+       //    )
+       //}
+        return Result("Коллекция очищена.", true, mutableListOf<CommitDto>(
+            CommitDto(CommitType.REMOVE_ALL, 0, null, ZonedDateTime.now().toEpochSecond())
+        ))
     }
 
     override fun getName(): String {
